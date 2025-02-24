@@ -27,7 +27,7 @@ void quicksort_indices(unsigned int* indices, int left, int right, unsigned int 
 }
 
 Tree::Tree()
-: root(nullptr), max_depth(-1), min_samples_split(3) {}
+: root(nullptr), max_depth(-1), min_samples_split(2) {}
 
 Tree::Tree(unsigned int max_depth_in, unsigned int min_samples_split_in)
 : root(nullptr), 
