@@ -25,7 +25,19 @@ int main() {
     predict[0] = new double[2];
     predict[0][0] = 3.1;
     predict[0][1] = 3.1;
-    std::cout << *tree.predict(1, predict) << std::endl;
+    double* prediction = tree.predict(1, predict); 
+    std::cout << *prediction << std::endl;
+
+    for (int i = 0; i < 5; ++i) {
+        delete[] x[i];
+    }
+    delete[] x;
+    delete y;
+
+    delete[] predict[0];
+    delete[] predict;
+
+    delete[] prediction;
 
     return 0;
 }
