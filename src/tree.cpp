@@ -1,5 +1,31 @@
 #include "static/tree.h"
 
+void quicksort_indices(unsigned int* indices, int left, int right, unsigned int col_idx, double** x) {
+    if (left >= right)
+        return;
+
+    double pivot = x[indices[(left + right) / 2]][col_idx];
+    int i = left;
+    int j = right;
+    while (i <= j) {
+        while (x[indices[i]][col_idx] < pivot)
+            i++;
+        while (x[indices[j]][col_idx] > pivot)
+            j--;
+        if (i <= j) {
+            unsigned int temp = indices[i];
+            indices[i] = indices[j];
+            indices[j] = temp;
+            i++;
+            j--;
+        }
+    }
+    if (left < j)
+        quicksort_indices(indices, left, j, col_idx, x);
+    if (i < right)
+        quicksort_indices(indices, i, right, col_idx, x);
+}
+
 Tree::Tree()
 : root(nullptr), max_depth(-1), min_samples_split(2) {}
 
@@ -51,11 +77,25 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
 
     // Loop through all possible splits
     double** row_ptr = x;
-    for (double** row_end = x + num_rows; row_ptr != row_end; ++row_ptr) {
-        for (unsigned int col_idx = 0; col_idx < num_cols; ++col_idx) {
-            // Find threshold for split
-            double threshold = (*row_ptr)[col_idx]; // TODO: use midpoints instead of boundaries (requires sorting)
-            
+    for (unsigned int col_idx = 0; col_idx < num_cols; ++col_idx) {
+        // Find indices that sort the attribute col
+        unsigned int* indices = new unsigned int[num_rows];
+        for (unsigned int i = 0; i < num_rows; ++i)
+            indices[i] = i;
+
+        quicksort_indices(indices, 0, num_rows - 1, col_idx, x);
+
+        // Iterate rows in sorted order for the attribute col
+        for (unsigned int i = 0; i < num_rows - 1; ++i) {
+            double current = x[indices[i]][col_idx];
+            double next = x[indices[i + 1]][col_idx];
+
+            if (current == next)
+                continue;
+
+            // Set threshold to midpoint
+            double threshold = (current + next) / 2;
+
             // Partition based on threshold
             double above_y[num_rows];
             double below_y[num_rows];
@@ -73,6 +113,7 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
                 }
             }
 
+            // TODO: look into SSE optimization, not sure if it affects results
             // Calculate weighted MSE of the partition
             double total_mse = (loss(below_idx, below_y)
                                + loss(above_idx, above_y)) / num_rows;
