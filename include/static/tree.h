@@ -3,6 +3,8 @@
 
 #include "static/node.h"
 #include <iostream>
+#include <cstdlib> // TODO: probably implement MT on my own
+#include <ctime>
 
 class Tree {
     private:

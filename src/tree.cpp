@@ -27,7 +27,7 @@ void quicksort_indices(unsigned int* indices, int left, int right, unsigned int 
 }
 
 Tree::Tree()
-: root(nullptr), max_depth(-1), min_samples_split(2) {}
+: root(nullptr), max_depth(-1), min_samples_split(3) {}
 
 Tree::Tree(unsigned int max_depth_in, unsigned int min_samples_split_in)
 : root(nullptr), 
@@ -73,6 +73,7 @@ double Tree::loss(unsigned int num_rows, double* y) {
 SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols, 
                            double** x, double* y) {
     double lowest_mse = 999999999; // TODO: figure out if I can use <limits>
+    unsigned int count = 0;
     SplitInfo split;
 
     // Loop through all possible splits
@@ -123,6 +124,15 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
                 lowest_mse = total_mse;
                 split.attribute = col_idx;
                 split.threshold = threshold;
+                count = 1;
+            }
+            else if (total_mse == lowest_mse) {
+                count++;
+                if (rand() % count == 0) {
+                    lowest_mse = total_mse;
+                    split.attribute = col_idx;
+                    split.threshold = threshold;
+                }
             }
         }
     }
