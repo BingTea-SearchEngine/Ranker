@@ -1,43 +1,81 @@
-//#include "static/node.h"
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <sstream>
+
 #include "static/tree.h"
 
-int main() {
-    Tree tree;
-    double base_x[5][2] = {{1, 5}, {2, 4}, {3, 3}, {4, 2}, {5, 1}};
-    double base_y[5] = {2, 3, 3.5, 5, 4.5};
+using namespace std;
 
-    double** x = new double*[5];
-    double* y = new double[5];
+std::vector<vector<double>> asdf(string filename) {
+    //string filename;
+    //cout << "Enter the filename: ";
+    //cin >> filename;
 
-    for (int i = 0; i < 5; ++i) {
-        x[i] = new double[2];
+    ifstream inputFile(filename);
+
+    if (!inputFile.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
     }
 
-    for (int i = 0; i < 5; ++i) {
-        for (int j = 0; j < 2; ++j) {
-            x[i][j] = base_x[i][j];
+    vector<vector<double>> data;
+    string line;
+
+    while (getline(inputFile, line)) {
+        vector<double> row;
+        stringstream ss(line);
+        double value;
+
+        while (ss >> value) {
+            row.push_back(value);
+            if (ss.peek() == ',')
+                ss.ignore();
         }
-        y[i] = base_y[i];
+        data.push_back(row);
     }
-    tree.fit(5, 2, x, y);
 
-    double** predict = new double*[1];
-    predict[0] = new double[2];
-    predict[0][0] = 3.1;
-    predict[0][1] = 3.1;
-    double* prediction = tree.predict(1, predict); 
-    std::cout << *prediction << std::endl;
+    inputFile.close();
 
-    for (int i = 0; i < 5; ++i) {
-        delete[] x[i];
+    cout << "Data read from file:" << endl;
+    for (const auto& row : data) {
+        std::cout << row.size() << std::endl;
+        for (double value : row) {
+            cout << value << " ";
+        }
+        cout << endl;
     }
-    delete[] x;
-    delete y;
+    return data;
+}
 
-    delete[] predict[0];
-    delete[] predict;
+int main() {
+    srand(static_cast<unsigned>(time(0)));
+    auto train_x = asdf("train_x.txt");
+    auto train_y = asdf("train_y.txt");
+    auto test_x = asdf("test_x.txt");
+    auto test_y = asdf("test_y.txt");
 
-    delete[] prediction;
+    double** x1 = new double*[14];
+    double* y1 = new double[14];
+    double** x2 = new double*[14];
+    double* y2 = new double[14];
 
+    for (int i = 0; i < 14; ++i) {
+        x1[i] = new double[6];
+        x2[i] = new double[6];
+        for (int j = 0; j < 6; ++j) {
+            x1[i][j] = train_x[i][j];
+            x2[i][j] = test_x[i][j];
+        }
+        y1[i] = train_y[0][i];
+        y2[i] = test_y[0][i];
+    }
+
+    Tree tree;
+    tree.fit(14, 6, x1, y1);
+    auto qwer = tree.predict(14, x2);
+    for (int i = 0; i < 14; ++i) {
+        std::cout << qwer[i] << std::endl;
+    }
+    
     return 0;
 }
