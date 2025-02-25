@@ -18,7 +18,7 @@ class Tree {
         unsigned int max_depth;
         unsigned int min_samples_split;
 
-        double loss(unsigned int num_rows, double* y);
+        double loss(unsigned int n, double sum, double sum_sq);
         // TODO: add different loss metrics
         // TODO: maybe add partition function to prevent code duplication
         SplitInfo best_split(unsigned int num_rows, unsigned int num_cols, 

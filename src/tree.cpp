@@ -46,38 +46,21 @@ Tree::~Tree() {
     destroy(root);
 }
 
-double Tree::loss(unsigned int num_rows, double* y) {
-    if (num_rows == 0) {
+double Tree::loss(unsigned int n, double sum, double sum_sq) {
+    if (n == 0)
         return 0;
-    }
 
-    // Find mean
-    double* ptr = y;
-    double sum = 0;
-    for (double* end = y + num_rows; ptr != end; ++ptr)
-        sum += *ptr;
-
-    double mean = sum / num_rows;
-
-    // Find MSE
-    double se = 0;
-    ptr = y;
-    for (double* end = y + num_rows; ptr != end; ++ptr) {
-        double diff = mean - *ptr;
-        se += diff * diff;
-    }
-
-    return se; // Don't divide, since we use a weighted sum afterward anyways
+    // Return SSE
+    return sum_sq - (sum * sum) / n;
 }
 
 SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols, 
                            double** x, double* y) {
-    double lowest_mse = 999999999; // TODO: figure out if I can use <limits>
+    double lowest_loss = 999999999; // TODO: figure out if I can use <limits>
     unsigned int count = 0;
     SplitInfo split;
 
     // Loop through all possible splits
-    double** row_ptr = x;
     for (unsigned int col_idx = 0; col_idx < num_cols; ++col_idx) {
         // Find indices that sort the attribute col
         unsigned int* indices = new unsigned int[num_rows];
@@ -86,7 +69,26 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
 
         quicksort_indices(indices, 0, num_rows - 1, col_idx, x);
 
-        // Iterate rows in sorted order for the attribute col
+        // Create list of cumulative sums and sqaured sums for SSE
+        // optimization
+        double cum_sum = 0;
+        double cum_sum_sq = 0;
+        double sums[num_rows];
+        double sum_sqs[num_rows];
+
+        
+        double** row_ptr = x;
+        for (unsigned int i = 0; i < num_rows - 1; ++i) {
+            double val = y[indices[i]];
+            cum_sum += val;
+            cum_sum_sq += val * val;
+
+            sums[i] = cum_sum;
+            sum_sqs[i] = cum_sum_sq;
+        }
+
+        // Using cumulative sums, iterate through each possible split
+        // calculating SSE
         for (unsigned int i = 0; i < num_rows - 1; ++i) {
             double current = x[indices[i]][col_idx];
             double next = x[indices[i + 1]][col_idx];
@@ -94,44 +96,33 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
             if (current == next)
                 continue;
 
-            // Set threshold to midpoint
-            double threshold = (current + next) / 2;
+            // Calculate SSE
+            unsigned int left_n = i + 1;
+            double left_sum = sums[i];
+            double left_sum_sq = sum_sqs[i];
+            double left_loss = loss(left_n, left_sum, left_sum_sq);
 
-            // Partition based on threshold
-            double above_y[num_rows];
-            double below_y[num_rows];
-            unsigned int above_idx = 0;
-            unsigned int below_idx = 0;
-            
-            for (unsigned int row_idx = 0; row_idx < num_rows; ++row_idx) {
-                if (x[row_idx][col_idx] < threshold) {
-                    below_y[below_idx] = y[row_idx];
-                    below_idx++;
-                }
-                else {
-                    above_y[above_idx] = y[row_idx];
-                    above_idx++;
-                }
-            }
+            unsigned int right_n = num_rows - i - 1;
+            double right_sum = cum_sum - left_sum;
+            double right_sum_sq = cum_sum_sq - left_sum_sq;
+            double right_loss = loss(right_n, right_sum, right_sum_sq);
 
-            // TODO: look into SSE optimization, not sure if it affects results
-            // Calculate weighted MSE of the partition
-            double total_mse = (loss(below_idx, below_y)
-                               + loss(above_idx, above_y)) / num_rows;
+            double total_loss = left_loss + right_loss;
             
             // Save the best split
-            if (total_mse < lowest_mse) {
-                lowest_mse = total_mse;
+            if (total_loss < lowest_loss) {
+                lowest_loss = total_loss;
                 split.attribute = col_idx;
-                split.threshold = threshold;
+                split.threshold = (current + next) / 2;
                 count = 1;
             }
-            else if (total_mse == lowest_mse) {
+            // Break ties randomly
+            else if (total_loss == lowest_loss) {
                 count++;
                 if (rand() % count == 0) {
-                    lowest_mse = total_mse;
+                    lowest_loss = total_loss;
                     split.attribute = col_idx;
-                    split.threshold = threshold;
+                    split.threshold = (current + next) / 2;
                 }
             }
         }
