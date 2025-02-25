@@ -6,6 +6,12 @@
 #include <cstdlib> // TODO: probably implement MT on my own
 #include <ctime>
 
+// For reading, temp
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+
 class Tree {
     private:
         Node* root;
@@ -33,5 +39,12 @@ class Tree {
         void fit(unsigned int num_rows, unsigned int num_cols, double** x, double* y);
         double* predict(unsigned int num_rows, double** x);
 };
+
+double* load_1D(std::string filename);
+
+double** load_2D(std::string filename);
+
+void print_1D_arr(unsigned int size, double* arr);
+void print_2D_arr(unsigned int num_rows, unsigned int num_cols, double** arr);
 
 #endif

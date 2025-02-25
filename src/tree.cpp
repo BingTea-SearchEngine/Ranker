@@ -245,3 +245,74 @@ double* Tree::predict(unsigned int num_rows, double** x) {
     
     return prediction;
 }
+
+double* load_1D(std::string filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Could not open the file: " << filename << std::endl;
+    }
+
+    std::vector<double> data;
+    std::string val;
+    while (std::getline(file, val, ',')) {
+        data.push_back(std::stod(val));
+    }
+        
+    file.close();
+    
+    unsigned int size = data.size();
+
+    double* array = new double[size];
+    for (unsigned int i = 0; i < size; ++i)
+        array[i] = data[i];
+
+    return array;
+}
+
+double** load_2D(std::string filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Could not open the file: " << filename << std::endl;
+    }
+
+    std::vector<std::vector<double>> data;
+    std::string line, val;
+    while (std::getline(file, line)) {
+        std::vector<double> vect;
+        std::stringstream s(line);
+        while (std::getline(s, val, ','))
+            vect.push_back(std::stod(val));
+        data.push_back(vect);
+    }
+        
+    file.close();
+    
+    unsigned int num_rows = data.size();
+    unsigned int num_cols = data[0].size();
+
+    double** array = new double*[num_rows];
+    for (unsigned int i = 0; i < num_rows; ++i) {
+        array[i] = new double[num_cols];
+        for (unsigned int j = 0; j < num_cols; ++j) 
+            array[i][j] = data[i][j];
+    }
+
+    return array;
+}
+
+void print_1D_arr(unsigned int size, double* arr) {
+    double* ptr = arr;
+    for (double* end = arr + size; ptr != end; ++ptr)
+        std::cout << *ptr << ' ';
+    std::cout << std::endl;
+}
+
+void print_2D_arr(unsigned int num_rows, unsigned int num_cols, double** arr) {
+    double** ptr = arr;
+    for (double** end = arr + num_rows; ptr != end; ++ptr) {
+        for (unsigned int i = 0; i < num_cols; ++i) {
+            std::cout << (*ptr)[i] << ' ';
+        }
+        std::cout << std::endl;
+    }
+}
