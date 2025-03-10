@@ -38,6 +38,7 @@ class Tree {
         ~Tree();
         void fit(unsigned int num_rows, unsigned int num_cols, double** x, double* y);
         double* predict(unsigned int num_rows, double** x);
+        unsigned int num_leaves();
 };
 
 double* load_1D(std::string filename);

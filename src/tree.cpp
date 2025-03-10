@@ -26,13 +26,11 @@ void quicksort_indices(unsigned int* indices, int left, int right, unsigned int 
         quicksort_indices(indices, i, right, col_idx, x);
 }
 
-Tree::Tree()
-: root(nullptr), max_depth(-1), min_samples_split(2) {}
+Tree::Tree() : root(nullptr), max_depth(-1), min_samples_split(2) {}
 
 Tree::Tree(unsigned int max_depth_in, unsigned int min_samples_split_in)
-: root(nullptr), 
-  max_depth(max_depth_in), 
-  min_samples_split(min_samples_split_in) {}
+  : root(nullptr), max_depth(max_depth_in), 
+    min_samples_split(min_samples_split_in) {}
 
 void Tree::destroy(Node* node) {
     if (node) {
@@ -61,9 +59,9 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
     SplitInfo split;
 
     // Loop through all possible splits
+    unsigned int* indices = new unsigned int[num_rows];
     for (unsigned int col_idx = 0; col_idx < num_cols; ++col_idx) {
         // Find indices that sort the attribute col
-        unsigned int* indices = new unsigned int[num_rows];
         for (unsigned int i = 0; i < num_rows; ++i)
             indices[i] = i;
 
@@ -127,6 +125,7 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
             }
         }
     }
+    delete[] indices;
 
     return split;
 }
@@ -306,4 +305,8 @@ void print_2D_arr(unsigned int num_rows, unsigned int num_cols, double** arr) {
         }
         std::cout << std::endl;
     }
+}
+
+unsigned int Tree::num_leaves() {
+    
 }
