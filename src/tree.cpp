@@ -1,6 +1,7 @@
 #include "static/tree.h"
 
-void quicksort_indices(unsigned int* indices, int left, int right, unsigned int col_idx, double** x) {
+void quicksort_indices(unsigned int* indices, double** x, 
+                       unsigned int col_idx, int left, int right) {
     if (left >= right)
         return;
 
@@ -21,9 +22,9 @@ void quicksort_indices(unsigned int* indices, int left, int right, unsigned int 
         }
     }
     if (left < j)
-        quicksort_indices(indices, left, j, col_idx, x);
+        quicksort_indices(indices, x, col_idx, left, j);
     if (i < right)
-        quicksort_indices(indices, i, right, col_idx, x);
+        quicksort_indices(indices, x, col_idx, i, right);
 }
 
 Tree::Tree() : root(nullptr), max_depth(-1), min_samples_split(2) {}
@@ -65,7 +66,7 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
         for (unsigned int i = 0; i < num_rows; ++i)
             indices[i] = i;
 
-        quicksort_indices(indices, 0, num_rows - 1, col_idx, x);
+        quicksort_indices(indices, x, col_idx, 0, num_rows - 1);
 
         // Create list of cumulative sums and sqaured sums for SSE
         // optimization
@@ -200,7 +201,8 @@ void Tree::split_node(unsigned int depth, Node* parent) {
     split_node(depth + 1, parent->right);
 }
 
-void Tree::fit(unsigned int num_rows, unsigned int num_cols, double** x, double* y) {
+void Tree::fit(unsigned int num_rows, unsigned int num_cols, 
+               double** x, double* y) {
     // Set up root
     root = new Node;
     root->x = x;
@@ -307,6 +309,30 @@ void print_2D_arr(unsigned int num_rows, unsigned int num_cols, double** arr) {
     }
 }
 
+unsigned int Tree::num_leaves(Node* node) {
+    if (node->is_leaf())
+        return 1;
+
+    return 1 + num_leaves(node->left) + num_leaves(node->right);
+}
+
 unsigned int Tree::num_leaves() {
-    
+    return num_leaves(root);
+}
+
+unsigned int Tree::height(Node* node) {
+    if (node->is_leaf())
+        return 1;
+
+    unsigned int left_height = height(node->left);
+    unsigned int right_height = height(node->right);
+
+    if (left_height > right_height)
+        return 1 + left_height;
+
+    return 1 + right_height;
+}
+
+unsigned int Tree::height() {
+    return height(root);
 }

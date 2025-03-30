@@ -27,7 +27,9 @@ class Tree {
         void split_node(unsigned int depth, Node* parent);
         double predict_row(double* row, Node* node);
         void destroy(Node* node);
-        
+        unsigned int num_leaves(Node* node);
+        unsigned int height(Node* node);
+
     public:
         // TODO: see if ranking needs to be fast, and if tree building
         // is something worth optimizing. If so, look into
@@ -39,6 +41,7 @@ class Tree {
         void fit(unsigned int num_rows, unsigned int num_cols, double** x, double* y);
         double* predict(unsigned int num_rows, double** x);
         unsigned int num_leaves();
+        unsigned int height();
 };
 
 double* load_1D(std::string filename);
