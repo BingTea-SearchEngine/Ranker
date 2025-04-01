@@ -10,7 +10,7 @@ class SparseNetwork {
         unsigned n;
         unsigned m;
         
-        unsigned long** to_from;
+        unsigned** to_from;
         unsigned** from_to;
         unsigned** weights;
         unsigned* in_degrees;
@@ -24,6 +24,7 @@ class SparseNetwork {
         SparseNetwork();
         SparseNetwork(unsigned n_in, unsigned m_in, 
                       unsigned* first_in, unsigned* second_in);
+        ~SparseNetwork();
         bool has_edge(unsigned node1, unsigned node2);
         double modularity();
         bool same_community(unsigned node1, unsigned node2);

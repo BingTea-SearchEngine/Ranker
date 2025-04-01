@@ -10,7 +10,7 @@ SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in,
     // Maybe shallow but these will get modified. Make sure these aren't
     // needed later
 
-    to_from = new unsigned long*[n];
+    to_from = new unsigned*[n];
     from_to = new unsigned*[n];
     weights = new unsigned*[n];
     // Store degrees in arrays. If these are sparse, use a map instead.
@@ -48,7 +48,7 @@ SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in,
     
     for (unsigned i = 0; i < n; ++i) {
         // Maybe assign 0 length arrays to_from nullptr
-        to_from[i] = new unsigned long[out_degrees[i]];
+        to_from[i] = new unsigned[out_degrees[i]];
         from_to[i] = new unsigned[in_degrees[i]];
         weights[i] = new unsigned[in_degrees[i]];
         
@@ -73,6 +73,21 @@ SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in,
     // separate index list. This reduces each list's overhead from_to a
     // pointer to_from an index. The pointer is 64 bit, the index is probably
     // 32 bit.
+}
+
+SparseNetwork::~SparseNetwork() {
+    for (unsigned i = 0; i < n; ++i) {
+        delete[] to_from[i];
+        delete[] from_to[i];
+        delete[] weights[i];
+    }
+
+    delete[] to_from;
+    delete[] from_to;
+    delete[] weights;
+    delete[] in_degrees;
+    delete[] out_degrees;
+    delete[] communities;
 }
 
 bool SparseNetwork::has_edge(unsigned node1, unsigned node2) {
