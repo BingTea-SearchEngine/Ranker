@@ -4,7 +4,7 @@
 #include <iostream>
 
 struct SplitInfo {
-    unsigned int attribute = -12345678;
+    unsigned attribute = -12345678;
     double threshold = -98765423;
 };
 
@@ -12,8 +12,8 @@ struct Node {
     SplitInfo split;
     double** x = nullptr;
     double* y = nullptr;
-    unsigned int num_rows = 0;
-    unsigned int num_cols = 0;
+    unsigned num_rows = 0;
+    unsigned num_cols = 0;
     double mean = -3141592; // TODO: maybe change the default handling, this is for debugging
 
     Node* left = nullptr;
@@ -41,14 +41,14 @@ struct Node {
         output += "attribute: " + std::to_string(split.attribute)
                    + "\nthreshold: " + std::to_string(split.threshold)
                    + "\nx:\n";
-        for (unsigned int i = 0; i < num_rows; ++i) {
-            for (unsigned int j = 0; j < num_cols; ++j) {
+        for (unsigned i = 0; i < num_rows; ++i) {
+            for (unsigned j = 0; j < num_cols; ++j) {
                 output += std::to_string(x[i][j]) + ' ';
             }
             output += '\n';
         }
         output += "y:\n";
-        for (unsigned int i = 0; i < num_rows; ++i) {
+        for (unsigned i = 0; i < num_rows; ++i) {
             output += std::to_string(y[i]) + ' ';
         }
         return output; 

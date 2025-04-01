@@ -7,15 +7,15 @@ template <typename T>
 class Vector {
     private:
         T* array;
-        unsigned int _size;
-        unsigned int _capacity;
+        unsigned _size;
+        unsigned _capacity;
     public:
         Vector()
           : _size(0), _capacity(1) {
             array = new T[_capacity];
         }
 
-        Vector(unsigned int size_in)
+        Vector(unsigned size_in)
           : _size(size_in), _capacity(2 * size_in) {
             array = new T[_capacity];
         }
@@ -27,7 +27,7 @@ class Vector {
         Vector(const Vector& other)
          : _size(other._size), _capacity(other._capacity) {
             array = new T[_capacity];
-            for (unsigned int i = 0; i < _size; ++i)
+            for (unsigned i = 0; i < _size; ++i)
                 array[i] = other.array[i];
         }
 
@@ -40,20 +40,20 @@ class Vector {
             _capacity = other._capacity;
             array = new T[_capacity];
         
-            for (unsigned int i = 0; i < _size; ++i)
+            for (unsigned i = 0; i < _size; ++i)
                 array[i] = other.array[i];
         
             return *this;
         }
 
-        void reserve(unsigned int capacity_in) {
+        void reserve(unsigned capacity_in) {
             if (capacity_in <= _size)
                 return;
 
             _capacity = capacity_in;
             T* new_array = new T[_capacity];
 
-            for (unsigned int i = 0; i < _size; ++i) {
+            for (unsigned i = 0; i < _size; ++i) {
                 new_array[i] = array[i];
             }
 
@@ -61,7 +61,7 @@ class Vector {
             array = new_array;
         }
         
-        void resize(unsigned int size_in) {
+        void resize(unsigned size_in) {
             if (size_in == _size)
                 return;
 
@@ -78,7 +78,7 @@ class Vector {
             }
 
             // Reverse extra capacity and increase size
-            unsigned int new_capacity = _capacity;
+            unsigned new_capacity = _capacity;
             while (new_capacity < size_in)
                 new_capacity *= 2;
             
@@ -86,11 +86,11 @@ class Vector {
             _size = size_in;
         }
 
-        unsigned int size() const {
+        unsigned size() const {
             return _size;
         }
         
-        unsigned int capacity() const {
+        unsigned capacity() const {
             return _capacity;
         }
 
@@ -114,7 +114,7 @@ class Vector {
             }
         }
 
-        T& operator[](unsigned int index) {
+        T& operator[](unsigned index) {
             if (index >= _size) {
                 throw std::out_of_range("Index out of bounds");
             }

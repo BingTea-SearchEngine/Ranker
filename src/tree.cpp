@@ -1,7 +1,7 @@
 #include "static/tree.h"
 
-void quicksort_indices(unsigned int* indices, double** x, 
-                       unsigned int col_idx, int left, int right) {
+void quicksort_indices(unsigned* indices, double** x, 
+                       unsigned col_idx, int left, int right) {
     if (left >= right)
         return;
 
@@ -14,7 +14,7 @@ void quicksort_indices(unsigned int* indices, double** x,
         while (x[indices[j]][col_idx] > pivot)
             j--;
         if (i <= j) {
-            unsigned int temp = indices[i];
+            unsigned temp = indices[i];
             indices[i] = indices[j];
             indices[j] = temp;
             i++;
@@ -29,7 +29,7 @@ void quicksort_indices(unsigned int* indices, double** x,
 
 Tree::Tree() : root(nullptr), max_depth(-1), min_samples_split(2) {}
 
-Tree::Tree(unsigned int max_depth_in, unsigned int min_samples_split_in)
+Tree::Tree(unsigned max_depth_in, unsigned min_samples_split_in)
   : root(nullptr), max_depth(max_depth_in), 
     min_samples_split(min_samples_split_in) {}
 
@@ -45,7 +45,7 @@ Tree::~Tree() {
     destroy(root);
 }
 
-double Tree::loss(unsigned int n, double sum, double sum_sq) {
+double Tree::loss(unsigned n, double sum, double sum_sq) {
     if (n == 0)
         return 0;
 
@@ -53,17 +53,17 @@ double Tree::loss(unsigned int n, double sum, double sum_sq) {
     return sum_sq - (sum * sum) / n;
 }
 
-SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols, 
+SplitInfo Tree::best_split(unsigned num_rows, unsigned num_cols, 
                            double** x, double* y) {
     double lowest_loss = 999999999; // TODO: figure out if I can use <limits>
-    unsigned int count = 0;
+    unsigned count = 0;
     SplitInfo split;
 
     // Loop through all possible splits
-    unsigned int* indices = new unsigned int[num_rows];
-    for (unsigned int col_idx = 0; col_idx < num_cols; ++col_idx) {
+    unsigned* indices = new unsigned[num_rows];
+    for (unsigned col_idx = 0; col_idx < num_cols; ++col_idx) {
         // Find indices that sort the attribute col
-        for (unsigned int i = 0; i < num_rows; ++i)
+        for (unsigned i = 0; i < num_rows; ++i)
             indices[i] = i;
 
         quicksort_indices(indices, x, col_idx, 0, num_rows - 1);
@@ -77,7 +77,7 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
 
         
         double** row_ptr = x;
-        for (unsigned int i = 0; i < num_rows - 1; ++i) {
+        for (unsigned i = 0; i < num_rows - 1; ++i) {
             double val = y[indices[i]];
             cum_sum += val;
             cum_sum_sq += val * val;
@@ -88,7 +88,7 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
 
         // Using cumulative sums, iterate through each possible split
         // calculating SSE
-        for (unsigned int i = 0; i < num_rows - 1; ++i) {
+        for (unsigned i = 0; i < num_rows - 1; ++i) {
             double current = x[indices[i]][col_idx];
             double next = x[indices[i + 1]][col_idx];
 
@@ -96,12 +96,12 @@ SplitInfo Tree::best_split(unsigned int num_rows, unsigned int num_cols,
                 continue;
 
             // Calculate SSE
-            unsigned int left_n = i + 1;
+            unsigned left_n = i + 1;
             double left_sum = sums[i];
             double left_sum_sq = sum_sqs[i];
             double left_loss = loss(left_n, left_sum, left_sum_sq);
 
-            unsigned int right_n = num_rows - i - 1;
+            unsigned right_n = num_rows - i - 1;
             double right_sum = cum_sum - left_sum;
             double right_sum_sq = cum_sum_sq - left_sum_sq;
             double right_loss = loss(right_n, right_sum, right_sum_sq);
@@ -135,7 +135,7 @@ SplitInfo Tree::best_split(Node* node) {
     return best_split(node->num_rows, node->num_cols, node->x, node->y);
 }
 
-void Tree::split_node(unsigned int depth, Node* parent) {
+void Tree::split_node(unsigned depth, Node* parent) {
     // Check for base cases
     if (depth == max_depth) {
         parent->calc_mean();
@@ -148,14 +148,14 @@ void Tree::split_node(unsigned int depth, Node* parent) {
 
     // Find the best split
     parent->split = best_split(parent);
-    unsigned int attribute = parent->split.attribute;
+    unsigned attribute = parent->split.attribute;
     double threshold = parent->split.threshold;
 
     // Set references to make this section exactly the same as in
     // best_split. Yes, it's code duplication but idk if it's worth
     // making a partition function that uses 4 more dynamic arrays.
-    unsigned int& num_rows = parent->num_rows;
-    unsigned int& num_cols = parent->num_cols;
+    unsigned& num_rows = parent->num_rows;
+    unsigned& num_cols = parent->num_cols;
     double**& x = parent->x;
     double*& y = parent->y;
 
@@ -164,10 +164,10 @@ void Tree::split_node(unsigned int depth, Node* parent) {
     double above_y[num_rows];
     double* below_x[num_rows];
     double below_y[num_rows];
-    unsigned int above_idx = 0;
-    unsigned int below_idx = 0;
+    unsigned above_idx = 0;
+    unsigned below_idx = 0;
     
-    for (unsigned int row_idx = 0; row_idx < num_rows; ++row_idx) {
+    for (unsigned row_idx = 0; row_idx < num_rows; ++row_idx) {
         // If below threshold, go left
         if (x[row_idx][attribute] < threshold) {
             below_x[below_idx] = x[row_idx];
@@ -201,7 +201,7 @@ void Tree::split_node(unsigned int depth, Node* parent) {
     split_node(depth + 1, parent->right);
 }
 
-void Tree::fit(unsigned int num_rows, unsigned int num_cols, 
+void Tree::fit(unsigned num_rows, unsigned num_cols, 
                double** x, double* y) {
     // Set up root
     root = new Node;
@@ -227,11 +227,11 @@ double Tree::predict_row(double* row, Node* node) {
     return predict_row(row, node->right);
 }
 
-double* Tree::predict(unsigned int num_rows, double** x) {
+double* Tree::predict(unsigned num_rows, double** x) {
     double* prediction = new double[num_rows];
     
     // Predict each row individually
-    for (unsigned int i = 0; i < num_rows; ++i) {
+    for (unsigned i = 0; i < num_rows; ++i) {
         prediction[i] = predict_row(x[i], root);
     }
     
@@ -252,10 +252,10 @@ double* load_1D(std::string filename) {
         
     file.close();
     
-    unsigned int size = data.size();
+    unsigned size = data.size();
 
     double* array = new double[size];
-    for (unsigned int i = 0; i < size; ++i)
+    for (unsigned i = 0; i < size; ++i)
         array[i] = data[i];
 
     return array;
@@ -279,53 +279,53 @@ double** load_2D(std::string filename) {
         
     file.close();
     
-    unsigned int num_rows = data.size();
-    unsigned int num_cols = data[0].size();
+    unsigned num_rows = data.size();
+    unsigned num_cols = data[0].size();
 
     double** array = new double*[num_rows];
-    for (unsigned int i = 0; i < num_rows; ++i) {
+    for (unsigned i = 0; i < num_rows; ++i) {
         array[i] = new double[num_cols];
-        for (unsigned int j = 0; j < num_cols; ++j) 
+        for (unsigned j = 0; j < num_cols; ++j) 
             array[i][j] = data[i][j];
     }
 
     return array;
 }
 
-void print_1D_arr(unsigned int size, double* arr) {
+void print_1D_arr(unsigned size, double* arr) {
     double* ptr = arr;
     for (double* end = arr + size; ptr != end; ++ptr)
         std::cout << *ptr << ' ';
     std::cout << std::endl;
 }
 
-void print_2D_arr(unsigned int num_rows, unsigned int num_cols, double** arr) {
+void print_2D_arr(unsigned num_rows, unsigned num_cols, double** arr) {
     double** ptr = arr;
     for (double** end = arr + num_rows; ptr != end; ++ptr) {
-        for (unsigned int i = 0; i < num_cols; ++i) {
+        for (unsigned i = 0; i < num_cols; ++i) {
             std::cout << (*ptr)[i] << ' ';
         }
         std::cout << std::endl;
     }
 }
 
-unsigned int Tree::num_leaves(Node* node) {
+unsigned Tree::num_leaves(Node* node) {
     if (node->is_leaf())
         return 1;
 
     return 1 + num_leaves(node->left) + num_leaves(node->right);
 }
 
-unsigned int Tree::num_leaves() {
+unsigned Tree::num_leaves() {
     return num_leaves(root);
 }
 
-unsigned int Tree::height(Node* node) {
+unsigned Tree::height(Node* node) {
     if (node->is_leaf())
         return 1;
 
-    unsigned int left_height = height(node->left);
-    unsigned int right_height = height(node->right);
+    unsigned left_height = height(node->left);
+    unsigned right_height = height(node->right);
 
     if (left_height > right_height)
         return 1 + left_height;
@@ -333,6 +333,6 @@ unsigned int Tree::height(Node* node) {
     return 1 + right_height;
 }
 
-unsigned int Tree::height() {
+unsigned Tree::height() {
     return height(root);
 }

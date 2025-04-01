@@ -2,7 +2,7 @@
 #define ALGORITHM_H
 
 template <typename T>
-int binary_search(T* values, T& target, unsigned int size) {
+int binary_search(T* values, T& target, unsigned size) {
     int left = 0;
     int right = size - 1;    
     
@@ -27,7 +27,7 @@ void quicksort(T* values, int left, int right) {
     if (left >= right || left < 0)
         return;
 
-    unsigned int pivot = values[(left + right) / 2];
+    unsigned pivot = values[(left + right) / 2];
 
     int i = left;
     int j = right;
@@ -38,7 +38,7 @@ void quicksort(T* values, int left, int right) {
         while (pivot < values[j])
             j--;
         if (i <= j) {
-            unsigned int temp = values[i];
+            unsigned temp = values[i];
             values[i] = values[j];
             values[j] = temp;
             i++;

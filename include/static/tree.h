@@ -15,20 +15,20 @@
 class Tree {
     private:
         Node* root;
-        unsigned int max_depth;
-        unsigned int min_samples_split;
+        unsigned max_depth;
+        unsigned min_samples_split;
 
-        double loss(unsigned int n, double sum, double sum_sq);
+        double loss(unsigned n, double sum, double sum_sq);
         // TODO: add different loss metrics
         // TODO: maybe add partition function to prevent code duplication
-        SplitInfo best_split(unsigned int num_rows, unsigned int num_cols, 
+        SplitInfo best_split(unsigned num_rows, unsigned num_cols, 
                              double** x, double* y);
         SplitInfo best_split(Node* node);
-        void split_node(unsigned int depth, Node* parent);
+        void split_node(unsigned depth, Node* parent);
         double predict_row(double* row, Node* node);
         void destroy(Node* node);
-        unsigned int num_leaves(Node* node);
-        unsigned int height(Node* node);
+        unsigned num_leaves(Node* node);
+        unsigned height(Node* node);
 
     public:
         // TODO: see if ranking needs to be fast, and if tree building
@@ -36,19 +36,19 @@ class Tree {
         // multithreading this. Or multithread XGB, but that may not be
         // possible.
         Tree();
-        Tree(unsigned int max_depth_in, unsigned int min_samples_split_in);
+        Tree(unsigned max_depth_in, unsigned min_samples_split_in);
         ~Tree();
-        void fit(unsigned int num_rows, unsigned int num_cols, double** x, double* y);
-        double* predict(unsigned int num_rows, double** x);
-        unsigned int num_leaves();
-        unsigned int height();
+        void fit(unsigned num_rows, unsigned num_cols, double** x, double* y);
+        double* predict(unsigned num_rows, double** x);
+        unsigned num_leaves();
+        unsigned height();
 };
 
 double* load_1D(std::string filename);
 
 double** load_2D(std::string filename);
 
-void print_1D_arr(unsigned int size, double* arr);
-void print_2D_arr(unsigned int num_rows, unsigned int num_cols, double** arr);
+void print_1D_arr(unsigned size, double* arr);
+void print_2D_arr(unsigned num_rows, unsigned num_cols, double** arr);
 
 #endif
