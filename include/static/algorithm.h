@@ -24,7 +24,7 @@ int binary_search(T* values, T& target, unsigned size) {
 
 template <typename T>
 void quicksort(T* values, int left, int right) {
-    if (left >= right || left < 0)
+    if (left >= right)
         return;
 
     unsigned pivot = values[(left + right) / 2];
