@@ -3,7 +3,7 @@
 
 SparseNetwork::SparseNetwork() {}
 
-SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in, 
+SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in, 
                              unsigned* first_in, unsigned* second_in)
   : n(n_in), m(m_in), num_communities(n_in) {
     // Deep copy edge lists
