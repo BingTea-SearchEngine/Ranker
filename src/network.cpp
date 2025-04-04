@@ -5,7 +5,7 @@ SparseNetwork::SparseNetwork() {}
 
 SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in, 
                              unsigned* first_in, unsigned* second_in)
-  : n(n_in), m(m_in) {
+  : n(n_in), m(m_in), num_communities(n_in) {
     // Deep copy edge lists
     // Maybe shallow but these will get modified. Make sure these aren't
     // needed later
@@ -27,26 +27,17 @@ SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in,
         out_degrees[i] = 0;
     }
     
-    communities = new Vector<unsigned>[n];
+    // Assign each node to its own community
+    communities = new Deque<unsigned>[n];
     reverse_communities = new unsigned[n];
     community_in_weights = new unsigned[n];
     community_out_weights = new unsigned[n];
     for (unsigned i = 0; i < n; ++i) {
-        communities[i] = Vector<unsigned>(1);
-        communities[0] = i;
+        communities[i].push_back(i);
         reverse_communities[i] = i;
         community_in_weights[i] = 1;
         community_out_weights[i] = 1;
     }
-    /*
-    // Default initialize each node to_from its own community. There's gotta
-    // be a better way to_from do this, this is so memory inefficient
-    communities = new Vector<unsigned>[n];
-    for (unsigned i = 0; i < n; ++i) {
-        communities[i] = Vector<unsigned>();
-        communities[i].push_back(i);
-    }
-    */
     
     for (unsigned i = 0; i < m; ++i) {
         unsigned node1 = first_in[i];
@@ -63,10 +54,10 @@ SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in,
     
     for (unsigned i = 0; i < n; ++i) {
         // Maybe assign 0 length arrays to_from nullptr
-        to_from[i] = new unsigned[out_degrees[i]];
-        from_to[i] = new unsigned[in_degrees[i]];
-        weights_to_from[i] = new unsigned[out_degrees[i]];
-        weights_from_to[i] = new unsigned[in_degrees[i]];
+        to_from[i] = new unsigned[in_degrees[i]];
+        from_to[i] = new unsigned[out_degrees[i]];
+        weights_to_from[i] = new unsigned[in_degrees[i]];
+        weights_from_to[i] = new unsigned[out_degrees[i]];
         
         in_degrees[i] = 0;
         out_degrees[i] = 0;
@@ -106,16 +97,19 @@ SparseNetwork::~SparseNetwork() {
     delete[] weights_from_to;
     delete[] in_degrees;
     delete[] out_degrees;
+    delete[] community_in_weights;
+    delete[] community_out_weights;
     delete[] in_weights;
     delete[] out_weights;
 
+    delete[] communities;
     if (delete_communities)
-        delete[] communities;
+        delete[] reverse_communities;
 }
 
-bool SparseNetwork::has_edge(unsigned node1, unsigned node2) {
+int SparseNetwork::has_edge(unsigned node1, unsigned node2) {
     // If the size is <20, then it's faster to iterative search
-    return binary_search(from_to[node1], node2, out_degrees[node1]) != -1;
+    return binary_search(from_to[node1], node2, out_degrees[node1]);
 }
 
 bool SparseNetwork::same_community(unsigned node1, unsigned node2) {
@@ -126,10 +120,10 @@ double SparseNetwork::modularity() {
     // TODO: this is easily multithreadable
 
     double total = 0;
-    for (unsigned node = 0; node < n; ++node)
-        total += node_modularity(node);
+    for (unsigned community = 0; community < num_communities; ++community)
+        total += community_modularity(community);
 
-    return total / m;
+    return total;
 }
 
 unsigned* SparseNetwork::get_successors(unsigned node) {
@@ -181,52 +175,95 @@ unsigned SparseNetwork::node_community_weight(unsigned node, bool out) {
     return total;
 }
 
-void SparseNetwork::set_community(unsigned node, unsigned community) {
-    unsigned original_community = reverse_communities[node];
-    unsigned in_weight = in_weights[node];
-    unsigned out_weight = out_weights[node];
-    
-    community_in_weights[original_community] -= in_weight;
-    community_out_weights[original_community] -= out_weight;
+void SparseNetwork::add_to_community(unsigned node, unsigned community) {
+    // I'm lazy and can't be bothered to think of an actually good
+    // solution. Assume that the given node doesn't already belong in a
+    // community (aka it's been placed in a temp community) so we don't
+    // have to clean it up once it's taken out.
+    communities[community].push_back(node);
 
-    community_in_weights[community] += in_weight;
-    community_out_weights[community] += out_weight;
+    community_in_weights[community] += in_weights[node];
+    community_out_weights[community] += out_weights[node];
 
     reverse_communities[node] = community;
     // Remove from old community
     // Add to new community
 }
 
-double SparseNetwork::node_modularity(unsigned node) {
-    // This may also be worth multithreading
+unsigned SparseNetwork::remove_from_community(unsigned community) {
+    unsigned node = communities[community].front();
+    communities[community].pop_front();
 
-    // THIS IS FUCKED
-    // I NEED A WAY TO GET ALL PAIRS WITHIN A COMMUNITY, EVEN IF THERE'S
-    // NO EDGE
-    double total = 0;
-    for (unsigned j = 0; j < out_degrees[node]; ++j) {
-        unsigned other = from_to[node][j];
-        if (same_community(node, other)) {
-            total += weights_from_to[node][j] - double(out_degrees[node] * in_degrees[other]) / m;
-        }
-    }
-    return total;
+    reverse_communities[node] = -1;
+
+    community_in_weights[community] -= in_weights[node];
+    community_out_weights[community] -= out_weights[node];
+
+    return node;
 }
 
-void SparseNetwork::set_communities(unsigned* communities_in) {
-    delete[] communities;
-    delete_communities = false;
+double SparseNetwork::community_modularity(unsigned community) {
+    auto& target_comm = communities[community];
+    double total = 0;
+    for (unsigned i = 0; i < target_comm.size(); ++i) {
+        for (unsigned j = 0; j < target_comm.size(); ++j) {
+            unsigned node1 = target_comm[i];
+            unsigned node2 = target_comm[j];
 
-    // communities = communities_in;
+            int index = has_edge(node1, node2);
+            if (index != -1) {
+                total += weights_from_to[node1][index];
+            }
+
+            total -= double(out_degrees[node1] * in_degrees[node2]) / m;
+        }
+    }
+    return total / m;
+}
+
+void SparseNetwork::set_communities(unsigned* reverse_communities_in) {
+    delete[] reverse_communities;
+    delete[] communities;
+    delete[] community_in_weights;
+    delete[] community_out_weights;
+    delete_communities = false;
+    reverse_communities = reverse_communities_in;
+
+    for (unsigned i = 0; i < n; ++i) {
+        unsigned community = reverse_communities_in[i];
+        if (community >= num_communities)
+            num_communities = community + 1;
+    }
+
+    communities = new Deque<unsigned>[num_communities];
+    community_in_weights = new unsigned[num_communities];
+    community_out_weights = new unsigned[num_communities];
+    for (unsigned i = 0; i < num_communities; ++i) {
+        community_in_weights[i] = 0;
+        community_out_weights[i] = 0;
+    }
+
+    for (unsigned i = 0; i < n; ++i) {
+        unsigned community = reverse_communities_in[i];
+        if (community >= num_communities)
+            num_communities = community + 1;
+        
+        communities[community].push_back(i);
+        community_in_weights[community] += in_weights[i];
+        community_out_weights[community] += out_weights[i];
+    }
+
+    for (unsigned i = 0; i < num_communities; ++i) {
+        communities[i].print_inorder();
+    }
 }
 
 double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
-    // unsigned original_community = communities[node];
-    communities[node] = community;
+    reverse_communities[node] = community;
     unsigned weight = (node_community_weight(node, true) 
                        + node_community_weight(node, false));
-    unsigned expected = (out_weights[node] * community_in_weights[community]
-                         + in_weights[node] * community_out_weights[community]) / m;
-
+    double expected = double(out_weights[node] * community_in_weights[community]
+                             + in_weights[node] * community_out_weights[community]) / m;
+    
     return (weight - expected) / m;
 }
