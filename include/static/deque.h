@@ -14,10 +14,8 @@ class Deque {
         unsigned _back;
     public:
         Deque()
-          : _size(0), _capacity(1) {
+          : _size(0), _capacity(1), _front(0), _back(0) {
             circle = new T[_capacity];
-            _front = 1;
-            _back = 0;
         }
 
         ~Deque() {
@@ -76,6 +74,12 @@ class Deque {
         }
 
         void push_front(const T& value) {
+            if (_size == 0) {
+                circle[0] = value;
+                _size++;
+                return;
+            }
+
             if (_size == _capacity) {
                 reserve(2 * _capacity);
             }
@@ -86,6 +90,12 @@ class Deque {
         }
 
         void push_back(const T& value) {
+            if (_size == 0) {
+                circle[0] = value;
+                _size++;
+                return;
+            }
+
             if (_size == _capacity) {
                 reserve(2 * _capacity);
             }
