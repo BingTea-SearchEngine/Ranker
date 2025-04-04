@@ -35,8 +35,6 @@ SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in,
     for (unsigned i = 0; i < n; ++i) {
         communities[i].push_back(i);
         reverse_communities[i] = i;
-        community_in_weights[i] = 1;
-        community_out_weights[i] = 1;
     }
     
     for (unsigned i = 0; i < m; ++i) {
@@ -50,6 +48,8 @@ SparseNetwork::SparseNetwork(unsigned n_in, unsigned m_in,
     for (unsigned i = 0; i < n; ++i) {
         in_weights[i] = in_degrees[i];
         out_weights[i] = out_degrees[i];
+        community_in_weights[i] = in_degrees[i];
+        community_out_weights[i] = out_degrees[i];
     }
     
     for (unsigned i = 0; i < n; ++i) {
@@ -215,7 +215,7 @@ double SparseNetwork::community_modularity(unsigned community) {
                 total += weights_from_to[node1][index];
             }
 
-            total -= double(out_degrees[node1] * in_degrees[node2]) / m;
+            total -= double(out_weights[node1] * in_weights[node2]) / m;
         }
     }
     return total / m;
