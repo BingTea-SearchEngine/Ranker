@@ -9,11 +9,20 @@
 class SparseNetwork {
     private:
         bool delete_communities = true;
-
+        
+        // Maybe move communities and its related functions to
+        // Louvain. This might require more getter functions or making
+        // the privates public. I could friend, but that kind of feels
+        // bad, since I want this class to be universal. 
+        
+        // Maybe add a private function that returns a dynamic array of
+        // indices that refer to the neighbors within the same
+        // community. This avoid code duplication 
+    public:
         unsigned n;
         unsigned m;
         unsigned num_communities;
-
+        
         unsigned** to_from;
         unsigned** from_to;
         unsigned** weights_to_from;
@@ -24,20 +33,11 @@ class SparseNetwork {
         unsigned* out_weights;
         Deque<unsigned>* communities;
         unsigned* reverse_communities;
-        //unsigned* communities;
         unsigned* community_in_weights;
         unsigned* community_out_weights;
-        // Maybe move communities and its related functions to
-        // Louvain. This might require more getter functions or making
-        // the privates public. I could friend, but that kind of feels
-        // bad, since I want this class to be universal. 
 
-        // Maybe add a private function that returns a dynamic array of
-        // indices that refer to the neighbors within the same
-        // community. This avoid code duplication 
-    public:
         SparseNetwork();
-        SparseNetwork(unsigned n_in, unsigned m_in,
+        SparseNetwork(unsigned const n_in, unsigned const m_in,
                       unsigned* first_in, unsigned* second_in);
         ~SparseNetwork();
         int has_edge(unsigned node1, unsigned node2);
