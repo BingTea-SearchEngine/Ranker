@@ -2,14 +2,17 @@
 #define LOUVAIN_H
 
 #include "static/network.h"
+#include "static/vector.h"
 
 class Louvain {
     private:
         unsigned original_n;
         SparseNetwork network;
-        //Deque<unsigned>* final_communities;
-        unsigned* final_reverse_communities;
-        unsigned* map;
+        Vector<Vector<unsigned>> final_communities;
+        //Vector<unsigned>* final_communities;
+        //unsigned* final_reverse_communities;
+        Vector<unsigned> final_reverse_communities;
+        unsigned* map = nullptr;
         unsigned new_num_comm;
         void phase1();
         void phase2();
@@ -24,6 +27,8 @@ class Louvain {
                 unsigned* first, unsigned* second);
         ~Louvain();
         void partition();
+        const Vector<Vector<unsigned>>& get_communities() const;
+        const Vector<unsigned>& get_reverse_communities() const;
 };
 
 #endif

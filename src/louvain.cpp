@@ -6,9 +6,9 @@ Louvain::Louvain() {}
 Louvain::Louvain(const unsigned n_in, const unsigned m_in,
                  unsigned** from_to, unsigned* out_degrees)
   : original_n(n_in), network(n_in, m_in, from_to, out_degrees), 
-    map(nullptr), new_num_comm(-1) {
+    final_reverse_communities(n_in), new_num_comm(-1) {
     //final_communities = new Deque<unsigned>[n_in];
-    final_reverse_communities = new unsigned[n_in];
+    final_reverse_communities.shrink_to_fit();
     for (unsigned i = 0; i < n_in; ++i) {
         final_reverse_communities[i] = i;
     }
@@ -18,19 +18,16 @@ Louvain::Louvain(const unsigned n_in, const unsigned m_in,
 Louvain::Louvain(unsigned const n_in, const unsigned m_in,
                  unsigned* first_in, unsigned* second_in)
   : original_n(n_in), network(n_in, m_in, first_in, second_in), 
-    map(nullptr), new_num_comm(-1) {
+    final_reverse_communities(n_in), new_num_comm(-1) {
     //final_communities = new Deque<unsigned>[n_in];
-    final_reverse_communities = new unsigned[n_in];
+    final_reverse_communities.shrink_to_fit();
     for (unsigned i = 0; i < n_in; ++i) {
         final_reverse_communities[i] = i;
     }
     network.print(true);
 }
 
-Louvain::~Louvain() {
-    //delete[] final_communities;
-    delete[] final_reverse_communities;
-}
+Louvain::~Louvain() {}
 
 void Louvain::phase1() {
     bool repeat = false;
@@ -236,9 +233,25 @@ void Louvain::partition() {
             break;
         phase2();
     }
+    
+    for (unsigned i = 0; i < new_num_comm; ++i) {
+        final_communities.push_back(Vector<unsigned>());
+    }
+    final_communities.shrink_to_fit();
 
     for (unsigned i = 0; i < original_n; ++i) {
-        std::cout << final_reverse_communities[i] << ' ';
+        final_communities[final_reverse_communities[i]].push_back(i);
     }
-    std::cout << '\n';
+
+    for (unsigned i = 0; i < new_num_comm; ++i) {
+        final_communities[i].shrink_to_fit();
+    }
+}
+
+const Vector<Vector<unsigned>>& Louvain::get_communities() const {
+    return final_communities;
+}
+
+const Vector<unsigned>& Louvain::get_reverse_communities() const {
+    return final_reverse_communities;
 }
