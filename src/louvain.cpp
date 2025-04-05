@@ -5,20 +5,31 @@ Louvain::Louvain() {}
 
 Louvain::Louvain(const unsigned n_in, const unsigned m_in,
                  unsigned** from_to, unsigned* out_degrees)
-  : network(n_in, m_in, from_to, out_degrees), map(nullptr), new_num_comm(-1) {
-    communities = new unsigned[n_in];
+  : original_n(n_in), network(n_in, m_in, from_to, out_degrees), 
+    map(nullptr), new_num_comm(-1) {
+    //final_communities = new Deque<unsigned>[n_in];
+    final_reverse_communities = new unsigned[n_in];
+    for (unsigned i = 0; i < n_in; ++i) {
+        final_reverse_communities[i] = i;
+    }
     network.print(true);
 }
 
 Louvain::Louvain(unsigned const n_in, const unsigned m_in,
                  unsigned* first_in, unsigned* second_in)
-  : network(n_in, m_in, first_in, second_in), map(nullptr), new_num_comm(-1) {
-    communities = new unsigned[n_in];
+  : original_n(n_in), network(n_in, m_in, first_in, second_in), 
+    map(nullptr), new_num_comm(-1) {
+    //final_communities = new Deque<unsigned>[n_in];
+    final_reverse_communities = new unsigned[n_in];
+    for (unsigned i = 0; i < n_in; ++i) {
+        final_reverse_communities[i] = i;
+    }
     network.print(true);
 }
 
 Louvain::~Louvain() {
-    delete[] communities;
+    //delete[] final_communities;
+    delete[] final_reverse_communities;
 }
 
 void Louvain::phase1() {
@@ -31,8 +42,7 @@ void Louvain::phase1() {
     
     double old_modularity = network.modularity();
     double new_modularity = network.modularity();
-    do
-    {
+    do {
         rng.shuffle(indices, network.n);
         old_modularity = new_modularity;
         // This groups nodes by community when , which is worse than 
@@ -56,6 +66,10 @@ void Louvain::phase1() {
  
     delete[] indices;
 
+    for (unsigned i = 0; i < original_n; ++i) {
+        final_reverse_communities[i] = network.reverse_communities[final_reverse_communities[i]];
+    }
+
     std::cout << new_modularity << std::endl;
     network.print(true);
 }
@@ -67,8 +81,9 @@ void Louvain::phase2() {
 }
 
 void Louvain::merge_communities() {
-    // Either modify data directly here, or make a member function
-    // that modifies, or just delete the old network and build a new one
+    // Either modify data directly here (current doing this), or make a
+    // member function that modifies, or just delete the old network and
+    // build a new one
     unsigned** to_from = new unsigned*[new_num_comm];
     unsigned** from_to = new unsigned*[new_num_comm];
     unsigned** weights_to_from = new unsigned*[new_num_comm];
@@ -198,4 +213,31 @@ void Louvain::reindex_communities() {
             map[current_community] = new_num_comm++;
         }
     }
+
+    for (unsigned i = 0; i < original_n; ++i) {
+        final_reverse_communities[i] = map[final_reverse_communities[i]];
+    }
+}
+
+bool Louvain::check_finished() {
+    for (unsigned i = 0; i < network.num_communities; ++i) {
+        if (network.communities[i].size() != 1)
+            return false;
+    }
+    return true;
+}
+
+void Louvain::partition() {
+    while (true) {
+        phase1();
+        bool finished = check_finished();
+        if (finished)
+            break;
+        phase2();
+    }
+
+    for (unsigned i = 0; i < original_n; ++i) {
+        std::cout << final_reverse_communities[i] << ' ';
+    }
+    std::cout << '\n';
 }

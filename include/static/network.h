@@ -8,8 +8,8 @@
 
 class SparseNetwork {
     private:
-        bool delete_communities = true;
         bool delete_from_to = true;
+        bool delete_communities = true;
         
         // Maybe move communities and its related functions to
         // Louvain. This might require more getter functions or making
@@ -22,7 +22,9 @@ class SparseNetwork {
     public:
         unsigned n;
         unsigned m;
-        unsigned num_communities;
+        unsigned num_communities; 
+        // This is separate from n since it may end up different when 
+        // set_communities is called
         
         unsigned** to_from;
         unsigned** from_to;
@@ -38,6 +40,8 @@ class SparseNetwork {
         unsigned* community_out_weights;
 
         SparseNetwork();
+        // TODO: maybe add another constructor that passes in a
+        // community assignment
         SparseNetwork(const unsigned n, const unsigned m,
                       unsigned** from_to, unsigned* out_degrees);
         SparseNetwork(unsigned const n, unsigned const m,
@@ -56,6 +60,8 @@ class SparseNetwork {
         double community_modularity(unsigned community);
         void set_communities(unsigned* reverse_communities);
         double modularity_diff(unsigned node, unsigned community);
+        void delete_responsibile();
+        void print(bool adjacency);
 };
     
 #endif

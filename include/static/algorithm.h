@@ -51,6 +51,52 @@ void quicksort(T* values, int left, int right) {
         quicksort(values, i, right);
 }
 
+template <typename T>
+bool lt_pair(T& left_first, T& left_second, 
+    T& right_first, T& right_second) {
+    if (left_first < right_first)
+        return true;
+
+    if (left_first > right_first)
+        return false;
+
+    return left_second < right_second;
+}
+
+template <typename T>
+void quicksort_pair(T* first, T* second, 
+                     int left, int right) {
+    if (left >= right || left < 0)
+        return;
+
+    unsigned pivot_first = first[(left + right) / 2];
+    unsigned pivot_second = second[(left + right) / 2];
+
+    int i = left;
+    int j = right;
+
+    while (i <= j) {
+        while (lt_pair(first[i], second[i], pivot_first, pivot_second))
+            i++;
+        while (lt_pair(pivot_first, pivot_second, first[j], second[j]))
+            j--;
+        if (i <= j) {
+            unsigned temp = first[i];
+            first[i] = first[j];
+            first[j] = temp;
+            temp = second[i];
+            second[i] = second[j];
+            second[j] = temp;
+            i++;
+            j--;
+        }
+    }
+    if (left < j)
+        quicksort_pair(first, second, left, j);
+    if (i < right)
+        quicksort_pair(first, second, i, right);
+}
+
 class RNG {
     private:
     // Internal state (seed)
