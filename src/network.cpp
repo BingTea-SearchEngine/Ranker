@@ -161,7 +161,7 @@ SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
 }
 
 SparseNetwork::~SparseNetwork() {
-    delete_responsibile();
+    delete_responsible();
 }
 
 int SparseNetwork::has_edge(unsigned node1, unsigned node2) {
@@ -321,7 +321,12 @@ double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
     return (weight - expected) / m;
 }
 
-void SparseNetwork::delete_responsibile() {
+void SparseNetwork::fully_responsible() {
+    delete_from_to = true;
+    delete_communities = true;
+}
+
+void SparseNetwork::delete_responsible() {
     // TODO: I haven't tested for edge cases
     for (unsigned i = 0; i < n; ++i) {
         delete[] to_from[i];

@@ -171,7 +171,8 @@ void Louvain::merge_communities() {
         }
     }
     delete[] map;
-    network.delete_responsibile();
+    network.delete_responsible();
+    network.fully_responsible();
 
     for (unsigned i = 0; i < new_num_comm; ++i) {
         quicksort_pair(to_from[i], weights_to_from[i], 0, in_degrees[i] - 1);
