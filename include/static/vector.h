@@ -86,6 +86,20 @@ class Vector {
             _size = size_in;
         }
 
+        void shrink_to_fit() {
+            if (_capacity == _size)
+                return;
+
+            T* new_array = new T[_size];
+            for (unsigned i = 0; i < _size; ++i) {
+                new_array[i] = array[i];
+            }
+
+            delete[] array;
+            array = new_array;
+            _capacity = _size;
+        }
+
         unsigned size() const {
             return _size;
         }

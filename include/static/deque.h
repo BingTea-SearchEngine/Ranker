@@ -65,6 +65,22 @@ class Deque {
             _capacity = capacity_in;
         }
 
+        void shrink_to_fit() {
+            if (_size == _capacity)
+                return;
+
+            T* new_circle = new T[_size];
+            for (unsigned i = 0; i < _size; ++i) {
+                new_circle[i] = this->operator[](i);
+            }
+
+            delete[] circle;
+            circle = new_circle;
+            _capacity = _size;
+            _front = 0;
+            _back = _size - 1;
+        }
+
         unsigned size() const {
             return _size;
         }
