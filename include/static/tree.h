@@ -36,7 +36,7 @@ class Tree {
         // multithreading this. Or multithread XGB, but that may not be
         // possible.
         Tree();
-        Tree(unsigned max_depth_in, unsigned min_samples_split_in);
+        Tree(unsigned max_depth, unsigned min_samples_split);
         ~Tree();
         void fit(unsigned num_rows, unsigned num_cols, double** x, double* y);
         double* predict(unsigned num_rows, double** x);
