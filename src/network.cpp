@@ -6,7 +6,8 @@ SparseNetwork::SparseNetwork() {}
 SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
                              unsigned** from_to_in, unsigned* out_degrees_in)
   : n(n_in), m(m_in), num_communities(n_in) {
-    
+    delete_from_to = false;
+
     to_from = new unsigned*[n];
     from_to = from_to_in;
     weights_to_from = new unsigned*[n];
@@ -157,17 +158,20 @@ SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
 SparseNetwork::~SparseNetwork() {
     for (unsigned i = 0; i < n; ++i) {
         delete[] to_from[i];
-        delete[] from_to[i];
+        if (delete_from_to)
+            delete[] from_to[i];
         delete[] weights_to_from[i];
         delete[] weights_from_to[i];
     }
 
     delete[] to_from;
-    delete[] from_to;
+    if (delete_from_to)
+        delete[] from_to;
     delete[] weights_to_from;
     delete[] weights_from_to;
     delete[] in_degrees;
-    delete[] out_degrees;
+    if (delete_from_to)
+        delete[] out_degrees;
     delete[] community_in_weights;
     delete[] community_out_weights;
     delete[] in_weights;

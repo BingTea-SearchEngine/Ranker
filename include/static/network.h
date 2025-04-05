@@ -9,6 +9,7 @@
 class SparseNetwork {
     private:
         bool delete_communities = true;
+        bool delete_from_to = true;
         
         // Maybe move communities and its related functions to
         // Louvain. This might require more getter functions or making
