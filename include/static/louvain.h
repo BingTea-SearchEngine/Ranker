@@ -7,8 +7,10 @@ class Louvain {
     private:
         SparseNetwork network;
         unsigned* communities;
+        unsigned* map;
+        unsigned new_num_comm;
         void merge_communities();
-        void reindex_communities(unsigned* map);
+        void reindex_communities();
     public:
         Louvain();
         Louvain(const unsigned n, const unsigned m,
@@ -18,7 +20,6 @@ class Louvain {
         ~Louvain();
         void phase1();
         void phase2();
-        
 };
 
 #endif
