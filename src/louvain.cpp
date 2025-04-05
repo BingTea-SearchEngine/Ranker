@@ -3,11 +3,21 @@
 
 Louvain::Louvain() {}
 
+Louvain::Louvain(const unsigned n_in, const unsigned m_in,
+                 unsigned** from_to, unsigned* out_degrees)
+  : network(n_in, m_in, from_to, out_degrees) {
+    communities = new unsigned[n_in];
+}
+
 Louvain::Louvain(unsigned const n_in, const unsigned m_in,
                  unsigned* first_in, unsigned* second_in)
-  : network(n_in, m_in, first_in, second_in) {}
+  : network(n_in, m_in, first_in, second_in) {
+    communities = new unsigned[n_in];
+}
 
-Louvain::~Louvain() {}
+Louvain::~Louvain() {
+    delete[] communities;
+}
 
 void Louvain::phase1() {
     bool repeat = false;
@@ -47,15 +57,32 @@ void Louvain::phase1() {
 }
 
 void Louvain::phase2() {
-
+    unsigned* map = new unsigned[network.num_communities];
+    reindex_communities(map);
+    merge_communities();
+    delete[] map;
 }
 
 void Louvain::merge_communities() {
-
+    // Either modify data directly here, or make a member function
+    // that modifies, or just delete the old network and build a new one
+    for (unsigned i = 0; i < network.num_communities; ++i) {
+        auto& community1 = network.communities[i];
+        for (unsigned j = 0; j < network.num_communities; ++j) {
+            auto& community2 = network.communities[j];
+            unsigned weight = 0;
+            for (unsigned k = 0; k < community1.size(); ++k) {
+                unsigned node1 = community1[k];
+                for (unsigned l = 0; l < community2.size(); ++l) {
+                    unsigned node2 = community2[l];
+                    
+                }
+            }
+        }
+    }
 }
 
-void Louvain::reindex_communities() {
-    unsigned* map = new unsigned[network.num_communities];
+void Louvain::reindex_communities(unsigned* map) {
     unsigned num_communities = 0;
     for (unsigned i = 0; i < network.num_communities; ++i) {
         map[i] = -1;
@@ -67,13 +94,4 @@ void Louvain::reindex_communities() {
             map[current_community] = num_communities++;
         }
     }
-
-    /*
-    Deque<unsigned>* communities = new Deque<unsigned>[num_communities];
-    for 
-    
-    network.num_communities = num_communities;
-    */
-
-    delete[] map;
 }
