@@ -3,6 +3,76 @@
 
 SparseNetwork::SparseNetwork() {}
 
+SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
+                             unsigned** from_to_in, unsigned* out_degrees_in)
+  : n(n_in), m(m_in), num_communities(n_in) {
+    
+    to_from = new unsigned*[n];
+    from_to = from_to_in;
+    weights_to_from = new unsigned*[n];
+    weights_from_to = new unsigned*[n];
+    // Store degrees in arrays. If these are sparse, use a map instead.
+    in_degrees = new unsigned[n];
+    out_degrees = out_degrees_in;
+    in_weights = new unsigned[n];
+    out_weights = new unsigned[n];
+
+    // Assign each node to its own community
+    communities = new Deque<unsigned>[n];
+    reverse_communities = new unsigned[n];
+    community_in_weights = new unsigned[n];
+    community_out_weights = new unsigned[n];
+    for (unsigned i = 0; i < n; ++i) {
+        communities[i].push_back(i);
+        reverse_communities[i] = i;
+    }
+
+    // TODO: find out if this is necessary. It they default to_from 0, or we
+    // can to_from new unsigned[m]{0} at declaration, then it's not.
+    for (unsigned i = 0; i < n; ++i) {
+        in_degrees[i] = 0;
+    }
+    
+    for (unsigned i = 0; i < n; ++i) {
+        for (unsigned j = 0; j < out_degrees[i]; ++j) {
+            unsigned node = from_to[i][j];
+            in_degrees[node]++;
+        }
+    }
+
+    for (unsigned i = 0; i < n; ++i) {
+        in_weights[i] = in_degrees[i];
+        out_weights[i] = out_degrees[i];
+        community_in_weights[i] = in_degrees[i];
+        community_out_weights[i] = out_degrees[i];
+        
+        // Maybe assign 0 length arrays to_from nullptr
+        to_from[i] = new unsigned[in_degrees[i]];
+        weights_to_from[i] = new unsigned[in_degrees[i]];
+        weights_from_to[i] = new unsigned[out_degrees[i]];
+
+        for (unsigned j = 0; j < in_degrees[i]; ++j)
+            weights_to_from[i][j] = 1;
+        for (unsigned j = 0; j < out_degrees[i]; ++j)
+            weights_from_to[i][j] = 1;
+        
+        in_degrees[i] = 0;
+    }
+
+    for (unsigned i = 0; i < n; ++i) {
+        for (unsigned j = 0; j < out_degrees[i]; ++j) {
+            unsigned node = from_to[i][j];
+            to_from[node][in_degrees[node]++] = i;
+        }
+    }
+
+    for (unsigned i = 0; i < n; ++i) {
+        // This is multithreadable. No overlapping memory accesses.
+        quicksort(to_from[i], 0, in_degrees[i] - 1);
+        quicksort(from_to[i], 0, out_degrees[i] - 1);
+    }
+}
+
 SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in, 
                              unsigned* first_in, unsigned* second_in)
   : n(n_in), m(m_in), num_communities(n_in) {
@@ -50,14 +120,17 @@ SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
         out_weights[i] = out_degrees[i];
         community_in_weights[i] = in_degrees[i];
         community_out_weights[i] = out_degrees[i];
-    }
-    
-    for (unsigned i = 0; i < n; ++i) {
+
         // Maybe assign 0 length arrays to_from nullptr
         to_from[i] = new unsigned[in_degrees[i]];
         from_to[i] = new unsigned[out_degrees[i]];
         weights_to_from[i] = new unsigned[in_degrees[i]];
         weights_from_to[i] = new unsigned[out_degrees[i]];
+
+        for (unsigned j = 0; j < in_degrees[i]; ++j)
+            weights_to_from[i][j] = 1;
+        for (unsigned j = 0; j < out_degrees[i]; ++j)
+            weights_from_to[i][j] = 1;
         
         in_degrees[i] = 0;
         out_degrees[i] = 0;
@@ -66,8 +139,6 @@ SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
     for (unsigned i = 0; i < m; ++i) {
         unsigned node1 = first_in[i];
         unsigned node2 = second_in[i];
-        weights_from_to[node1][out_degrees[node1]] = 1;
-        weights_to_from[node2][in_degrees[node2]] = 1;
         from_to[node1][out_degrees[node1]++] = node2;
         to_from[node2][in_degrees[node2]++] = node1;
     }

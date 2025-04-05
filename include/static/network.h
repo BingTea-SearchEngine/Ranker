@@ -37,8 +37,10 @@ class SparseNetwork {
         unsigned* community_out_weights;
 
         SparseNetwork();
-        SparseNetwork(unsigned const n_in, unsigned const m_in,
-                      unsigned* first_in, unsigned* second_in);
+        SparseNetwork(const unsigned n, const unsigned m,
+                      unsigned** from_to, unsigned* out_degrees);
+        SparseNetwork(unsigned const n, unsigned const m,
+                      unsigned* first, unsigned* second);
         ~SparseNetwork();
         int has_edge(unsigned node1, unsigned node2);
         double modularity();
@@ -51,7 +53,7 @@ class SparseNetwork {
         void add_to_community(unsigned node, unsigned community);
         unsigned remove_from_community(unsigned community);
         double community_modularity(unsigned community);
-        void set_communities(unsigned* reverse_communities_in);
+        void set_communities(unsigned* reverse_communities);
         double modularity_diff(unsigned node, unsigned community);
 };
     
