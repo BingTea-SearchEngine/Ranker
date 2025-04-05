@@ -71,6 +71,11 @@ SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
         // This is multithreadable. No overlapping memory accesses.
         quicksort(to_from[i], 0, in_degrees[i] - 1);
         quicksort(from_to[i], 0, out_degrees[i] - 1);
+        //quicksort_pair(to_from[i], weights_to_from[i], 0, in_degrees[i] - 1);
+        //quicksort_pair(from_to[i], weights_from_to[i], 0, out_degrees[i] - 1);
+        //Technically these should be sorted like twins, but weights are
+        //always initialized to 1, so there's no difference. But I feel
+        //like this should still be here.
     }
 }
 
@@ -156,34 +161,10 @@ SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
 }
 
 SparseNetwork::~SparseNetwork() {
-    for (unsigned i = 0; i < n; ++i) {
-        delete[] to_from[i];
-        if (delete_from_to)
-            delete[] from_to[i];
-        delete[] weights_to_from[i];
-        delete[] weights_from_to[i];
-    }
-
-    delete[] to_from;
-    if (delete_from_to)
-        delete[] from_to;
-    delete[] weights_to_from;
-    delete[] weights_from_to;
-    delete[] in_degrees;
-    if (delete_from_to)
-        delete[] out_degrees;
-    delete[] community_in_weights;
-    delete[] community_out_weights;
-    delete[] in_weights;
-    delete[] out_weights;
-
-    delete[] communities;
-    if (delete_communities)
-        delete[] reverse_communities;
+    delete_responsibile();
 }
 
 int SparseNetwork::has_edge(unsigned node1, unsigned node2) {
-    // If the size is <20, then it's faster to iterative search
     return binary_search(from_to[node1], node2, out_degrees[node1]);
 }
 
@@ -320,9 +301,6 @@ void SparseNetwork::set_communities(unsigned* reverse_communities_in) {
 
     for (unsigned i = 0; i < n; ++i) {
         unsigned community = reverse_communities_in[i];
-        if (community >= num_communities)
-            num_communities = community + 1;
-        
         communities[community].push_back(i);
         community_in_weights[community] += in_weights[i];
         community_out_weights[community] += out_weights[i];
@@ -341,4 +319,32 @@ double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
                              + in_weights[node] * community_out_weights[community]) / m;
     
     return (weight - expected) / m;
+}
+
+void SparseNetwork::delete_responsibile() {
+    // TODO: I haven't tested for edge cases
+    for (unsigned i = 0; i < n; ++i) {
+        delete[] to_from[i];
+        if (delete_from_to)
+            delete[] from_to[i];
+        delete[] weights_to_from[i];
+        delete[] weights_from_to[i];
+    }
+
+    delete[] to_from;
+    if (delete_from_to)
+        delete[] from_to;
+    delete[] weights_to_from;
+    delete[] weights_from_to;
+    delete[] in_degrees;
+    if (delete_from_to)
+        delete[] out_degrees;
+    delete[] community_in_weights;
+    delete[] community_out_weights;
+    delete[] in_weights;
+    delete[] out_weights;
+
+    delete[] communities;
+    if (delete_communities)
+        delete[] reverse_communities;
 }
