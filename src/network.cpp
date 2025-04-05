@@ -348,3 +348,117 @@ void SparseNetwork::delete_responsibile() {
     if (delete_communities)
         delete[] reverse_communities;
 }
+
+void SparseNetwork::print(bool adjacency) {
+    if (adjacency) {
+        std::cout << "adjacency matrix:\n";
+        for (unsigned i = 0; i < n; ++i) {
+            unsigned next = -1;
+            unsigned counter = 0;
+            if (out_degrees[i] != 0) {
+                next = from_to[i][counter];
+            }
+            for (unsigned j = 0; j < n; ++j) {
+                if (j == next) {
+                    std::cout << weights_from_to[i][counter++] << ' ';
+                    if (counter < out_degrees[i])
+                        next = from_to[i][counter];
+                }
+                else
+                    std::cout << "0 ";
+            }
+            std::cout << '\n';
+        }
+    }
+    
+    std::cout << "n: " << n << '\n';
+    std::cout << "m: " << m << '\n';
+    std::cout << "num_communities: " << num_communities << '\n';
+    
+    std::cout << "to_from:\n";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << i << " -> ";
+        for (unsigned j = 0; j < in_degrees[i]; ++j) {
+            std::cout << to_from[i][j] << ' ';
+        }
+        std::cout << '\n';
+    }
+
+    std::cout << "from_to:\n";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << i << " -> ";
+        for (unsigned j = 0; j < out_degrees[i]; ++j) {
+            std::cout << from_to[i][j] << ' ';
+        }
+        std::cout << '\n';
+    }
+
+    std::cout << "weights_to_from:\n";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << i << " -> ";
+        for (unsigned j = 0; j < in_degrees[i]; ++j) {
+            std::cout << weights_to_from[i][j] << ' ';
+        }
+        std::cout << '\n';
+    }
+
+    std::cout << "weights_from_to:\n";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << i << " -> ";
+        for (unsigned j = 0; j < out_degrees[i]; ++j) {
+            std::cout << weights_from_to[i][j] << ' ';
+        }
+        std::cout << '\n';
+    }
+
+    std::cout << "in_degrees: ";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << in_degrees[i] << ' ';
+    }
+    std::cout << '\n';
+
+    std::cout << "out_degrees: ";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << out_degrees[i] << ' ';
+    }
+    std::cout << '\n';
+
+    std::cout << "in_weights: ";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << in_weights[i] << ' ';
+    }
+    std::cout << '\n';
+
+    std::cout << "out_weights: ";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << out_weights[i] << ' ';
+    }
+    std::cout << '\n';
+
+    std::cout << "communities:\n";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << i << " -> ";
+        for (unsigned j = 0; j < communities[i].size(); ++j) {
+            std::cout << communities[i][j] << ' ';
+        }
+        std::cout << '\n';
+    }
+
+    std::cout << "reverse_communities: ";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << reverse_communities[i] << ' ';
+    }
+    std::cout << '\n';
+
+    std::cout << "community_in_weights: ";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << community_in_weights[i] << ' ';
+    }
+    std::cout << '\n';
+
+    std::cout << "community_out_weights: ";
+    for (unsigned i = 0; i < n; ++i) {
+        std::cout << community_out_weights[i] << ' ';
+    }
+    std::cout << '\n';
+}
