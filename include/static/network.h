@@ -7,6 +7,7 @@
 #include <limits>
 #include <fstream>
 #include <string> // idk if i should make my own string. Sounds annoying for other devs to initialize
+#include <stdexcept>
 
 class SparseNetwork {
     private:

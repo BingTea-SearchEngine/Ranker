@@ -408,7 +408,7 @@ void SparseNetwork::read_bitstream(const std::string& filename) {
     std::ifstream ifs(filename, std::ios::binary);
     if (!ifs) {
         // handle error
-        return;
+        throw std::runtime_error("file does not exist, is empty, or is badly formatted");
     }
     
     m = 0;
