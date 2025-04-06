@@ -135,6 +135,10 @@ class Vector {
         
             return array[index];
         }
+
+        T* data() {
+            return array;
+        }
 };
 
 #endif
