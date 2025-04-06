@@ -12,7 +12,6 @@ Louvain::Louvain(const std::string& filename)
         final_reverse_communities[i] = i;
     }
     network.print(true);
-    //network.save("qwer");
     new_num_comm = -1;
 }
 
@@ -26,7 +25,6 @@ Louvain::Louvain(const unsigned n_in, const unsigned m_in,
         final_reverse_communities[i] = i;
     }
     network.print(true);
-    //network.save("qwer");
 }
 
 Louvain::Louvain(unsigned const n_in, const unsigned m_in,
@@ -39,7 +37,6 @@ Louvain::Louvain(unsigned const n_in, const unsigned m_in,
         final_reverse_communities[i] = i;
     }
     network.print(true);
-    //network.save("qwer");
 }
 
 Louvain::~Louvain() {}
@@ -269,4 +266,16 @@ const Vector<Vector<unsigned>>& Louvain::get_communities() const {
 
 const Vector<unsigned>& Louvain::get_reverse_communities() const {
     return final_reverse_communities;
+}
+
+void Louvain::save_network(const std::string& filename) {
+    network.save(filename);
+}
+
+void Louvain::save_communities(const std::string& filename) {
+    throw std::logic_error("not implemented");
+}
+
+void Louvain::save_reverse_communities(const std::string& filename) {
+    throw std::logic_error("not implemented");
 }

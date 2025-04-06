@@ -31,6 +31,9 @@ class Louvain {
         void partition();
         const Vector<Vector<unsigned>>& get_communities() const;
         const Vector<unsigned>& get_reverse_communities() const;
+        void save_network(const std::string& filename);
+        void save_communities(const std::string& filename);
+        void save_reverse_communities(const std::string& filename);
 };
 
 #endif
