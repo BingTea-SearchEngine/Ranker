@@ -5,6 +5,8 @@
 #include "static/deque.h"
 #include <iostream>
 #include <limits>
+#include <fstream>
+#include <string> // idk if i should make my own string. Sounds annoying for other devs to initialize
 
 class SparseNetwork {
     private:
@@ -19,6 +21,9 @@ class SparseNetwork {
         // Maybe add a private function that returns a dynamic array of
         // indices that refer to the neighbors within the same
         // community. This avoid code duplication 
+        void read_bitstream(const std::string& filename); // This modifies n, m, num_communities, from_to, and out_degrees
+        void read_txt(const std::string& filename); // This modifies n, m, num_communities, from_to, and out_degrees
+        void construct_with_from_to(bool responsible);
     public:
         unsigned n;
         unsigned m;
@@ -40,6 +45,7 @@ class SparseNetwork {
         unsigned* community_out_weights;
 
         SparseNetwork();
+        SparseNetwork(const std::string& filename);
         // TODO: maybe add another constructor that passes in a
         // community assignment
         SparseNetwork(const unsigned n, const unsigned m,
@@ -63,6 +69,7 @@ class SparseNetwork {
         void fully_responsible();
         void delete_responsible();
         void print(bool adjacency);
+        void save(const std::string& filename);
 };
     
 #endif

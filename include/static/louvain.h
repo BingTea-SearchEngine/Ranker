@@ -3,6 +3,7 @@
 
 #include "static/network.h"
 #include "static/vector.h"
+#include <string>
 
 class Louvain {
     private:
@@ -21,6 +22,7 @@ class Louvain {
         bool check_finished();
     public:
         Louvain();
+        Louvain(const std::string& filename);
         Louvain(const unsigned n, const unsigned m,
                 unsigned** from_to, unsigned* out_degrees);
         Louvain(unsigned const n, const unsigned m,

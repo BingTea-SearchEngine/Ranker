@@ -3,80 +3,15 @@
 
 SparseNetwork::SparseNetwork() {}
 
+SparseNetwork::SparseNetwork(const std::string& filename) {
+    read_bitstream(filename);
+    construct_with_from_to(true);
+}
+
 SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
                              unsigned** from_to_in, unsigned* out_degrees_in)
-  : n(n_in), m(m_in), num_communities(n_in) {
-    delete_from_to = false;
-
-    to_from = new unsigned*[n];
-    from_to = from_to_in;
-    weights_to_from = new unsigned*[n];
-    weights_from_to = new unsigned*[n];
-    // Store degrees in arrays. If these are sparse, use a map instead.
-    in_degrees = new unsigned[n];
-    out_degrees = out_degrees_in;
-    in_weights = new unsigned[n];
-    out_weights = new unsigned[n];
-
-    // Assign each node to its own community
-    communities = new Deque<unsigned>[n];
-    reverse_communities = new unsigned[n];
-    community_in_weights = new unsigned[n];
-    community_out_weights = new unsigned[n];
-    for (unsigned i = 0; i < n; ++i) {
-        communities[i].push_back(i);
-        reverse_communities[i] = i;
-    }
-
-    // TODO: find out if this is necessary. It they default to_from 0, or we
-    // can to_from new unsigned[m]{0} at declaration, then it's not.
-    for (unsigned i = 0; i < n; ++i) {
-        in_degrees[i] = 0;
-    }
-    
-    for (unsigned i = 0; i < n; ++i) {
-        for (unsigned j = 0; j < out_degrees[i]; ++j) {
-            unsigned node = from_to[i][j];
-            in_degrees[node]++;
-        }
-    }
-
-    for (unsigned i = 0; i < n; ++i) {
-        in_weights[i] = in_degrees[i];
-        out_weights[i] = out_degrees[i];
-        community_in_weights[i] = in_degrees[i];
-        community_out_weights[i] = out_degrees[i];
-        
-        // Maybe assign 0 length arrays to_from nullptr
-        to_from[i] = new unsigned[in_degrees[i]];
-        weights_to_from[i] = new unsigned[in_degrees[i]];
-        weights_from_to[i] = new unsigned[out_degrees[i]];
-
-        for (unsigned j = 0; j < in_degrees[i]; ++j)
-            weights_to_from[i][j] = 1;
-        for (unsigned j = 0; j < out_degrees[i]; ++j)
-            weights_from_to[i][j] = 1;
-        
-        in_degrees[i] = 0;
-    }
-
-    for (unsigned i = 0; i < n; ++i) {
-        for (unsigned j = 0; j < out_degrees[i]; ++j) {
-            unsigned node = from_to[i][j];
-            to_from[node][in_degrees[node]++] = i;
-        }
-    }
-
-    for (unsigned i = 0; i < n; ++i) {
-        // This is multithreadable. No overlapping memory accesses.
-        quicksort(to_from[i], 0, in_degrees[i] - 1);
-        quicksort(from_to[i], 0, out_degrees[i] - 1);
-        //quicksort_pair(to_from[i], weights_to_from[i], 0, in_degrees[i] - 1);
-        //quicksort_pair(from_to[i], weights_from_to[i], 0, out_degrees[i] - 1);
-        //Technically these should be sorted like twins, but weights are
-        //always initialized to 1, so there's no difference. But I feel
-        //like this should still be here.
-    }
+  : n(n_in), m(m_in), num_communities(n_in), from_to(from_to_in), out_degrees(out_degrees_in) {
+    construct_with_from_to(false);
 }
 
 SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in, 
@@ -466,4 +401,141 @@ void SparseNetwork::print(bool adjacency) {
         std::cout << community_out_weights[i] << ' ';
     }
     std::cout << '\n';
+}
+
+void SparseNetwork::read_bitstream(const std::string& filename) {
+    unsigned** raw_rows = nullptr;
+    std::ifstream ifs(filename, std::ios::binary);
+    if (!ifs) {
+        // handle error
+        return;
+    }
+    
+    m = 0;
+
+    Vector<unsigned*> rows;
+    Vector<unsigned> degrees;
+    while (ifs.peek() != EOF) {
+        Vector<unsigned> row;
+        unsigned value;
+        // Read until sentinel is encountered
+        while (ifs.read(reinterpret_cast<char*>(&value), sizeof(value))) {
+            if (value == -1) {
+                break;
+            }
+            row.push_back(value);
+            
+        }
+        m += row.size();
+        degrees.push_back(row.size());
+        unsigned* raw_row = new unsigned[row.size()];
+        for (unsigned i = 0; i < row.size(); ++i) {
+            raw_row[i] = row[i];
+        }
+        rows.push_back(raw_row);
+    }
+    
+    n = rows.size();
+    num_communities = n;
+    from_to = new unsigned*[n];
+    out_degrees = new unsigned[n];
+    for (unsigned i = 0; i < n; ++i) {
+        from_to[i] = rows[i];
+        out_degrees[i] = degrees[i];
+    }
+}
+
+void SparseNetwork::read_txt(const std::string& filename) {
+
+}
+
+void SparseNetwork::save(const std::string& filename) {
+std::ofstream ofs(filename, std::ios::binary);
+    if (!ofs) {
+        // handle error
+        return;
+    }
+    for (unsigned i = 0; i < n; ++i) {
+        auto& row = from_to[i];
+        // Write each integer in the row
+        for (unsigned j = 0; j < out_degrees[i]; ++j) {
+            const auto& value = row[j];
+            ofs.write(reinterpret_cast<const char*>(&value), sizeof(value));
+        }
+        // Write sentinel
+        unsigned sentinel = -1;
+        ofs.write(reinterpret_cast<const char*>(&sentinel), sizeof(sentinel));
+    }
+}
+
+void SparseNetwork::construct_with_from_to(bool responsible) {
+    delete_from_to = responsible;
+
+    to_from = new unsigned*[n];
+    weights_to_from = new unsigned*[n];
+    weights_from_to = new unsigned*[n];
+    // Store degrees in arrays. If these are sparse, use a map instead.
+    in_degrees = new unsigned[n];
+    in_weights = new unsigned[n];
+    out_weights = new unsigned[n];
+
+    // Assign each node to its own community
+    communities = new Deque<unsigned>[n];
+    reverse_communities = new unsigned[n];
+    community_in_weights = new unsigned[n];
+    community_out_weights = new unsigned[n];
+    for (unsigned i = 0; i < n; ++i) {
+        communities[i].push_back(i);
+        reverse_communities[i] = i;
+    }
+
+    // TODO: find out if this is necessary. It they default to_from 0, or we
+    // can to_from new unsigned[m]{0} at declaration, then it's not.
+    for (unsigned i = 0; i < n; ++i) {
+        in_degrees[i] = 0;
+    }
+    
+    for (unsigned i = 0; i < n; ++i) {
+        for (unsigned j = 0; j < out_degrees[i]; ++j) {
+            unsigned node = from_to[i][j];
+            in_degrees[node]++;
+        }
+    }
+
+    for (unsigned i = 0; i < n; ++i) {
+        in_weights[i] = in_degrees[i];
+        out_weights[i] = out_degrees[i];
+        community_in_weights[i] = in_degrees[i];
+        community_out_weights[i] = out_degrees[i];
+        
+        // Maybe assign 0 length arrays to_from nullptr
+        to_from[i] = new unsigned[in_degrees[i]];
+        weights_to_from[i] = new unsigned[in_degrees[i]];
+        weights_from_to[i] = new unsigned[out_degrees[i]];
+
+        for (unsigned j = 0; j < in_degrees[i]; ++j)
+            weights_to_from[i][j] = 1;
+        for (unsigned j = 0; j < out_degrees[i]; ++j)
+            weights_from_to[i][j] = 1;
+        
+        in_degrees[i] = 0;
+    }
+
+    for (unsigned i = 0; i < n; ++i) {
+        for (unsigned j = 0; j < out_degrees[i]; ++j) {
+            unsigned node = from_to[i][j];
+            to_from[node][in_degrees[node]++] = i;
+        }
+    }
+
+    for (unsigned i = 0; i < n; ++i) {
+        // This is multithreadable. No overlapping memory accesses.
+        quicksort(to_from[i], 0, in_degrees[i] - 1);
+        quicksort(from_to[i], 0, out_degrees[i] - 1);
+        //quicksort_pair(to_from[i], weights_to_from[i], 0, in_degrees[i] - 1);
+        //quicksort_pair(from_to[i], weights_from_to[i], 0, out_degrees[i] - 1);
+        //Technically these should be sorted like twins, but weights are
+        //always initialized to 1, so there's no difference. But I feel
+        //like this should still be here.
+    }
 }
