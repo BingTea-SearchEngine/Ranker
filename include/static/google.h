@@ -10,10 +10,10 @@
 // base class called Matrix or something
 class GoogleMatrix {
     private:
+        char* delete_map;
         bool delete_from_to = true;
         void read_bitstream(const std::string& filename); // This modifies n, m, num_communities, from_to, and out_degrees
         void read_txt(const std::string& filename); // This modifies n, m, num_communities, from_to, and out_degrees
-        void construct_with_from_to(bool responsible);
         void convert_google();
         void iteration(double damping);
         Vector<double> page_ranks;
@@ -29,6 +29,7 @@ class GoogleMatrix {
                      unsigned* out_degrees_in);
         GoogleMatrix(unsigned const n_in, unsigned const m_in,
                      unsigned* first_in, unsigned* second_in);
+        ~GoogleMatrix();
         Vector<double> pagerank(double damping);
         void print(bool adjacency);
         void save(const std::string& filename);

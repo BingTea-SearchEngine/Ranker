@@ -6,8 +6,13 @@ GoogleMatrix::GoogleMatrix(const std::string& filename) {}
 
 GoogleMatrix::GoogleMatrix(const unsigned n_in, unsigned** from_to_in, 
                            unsigned* out_degrees_in)
-  : n(n_in), from_to(from_to_in), page_ranks(n_in) {
+  : n(n_in), from_to(from_to_in), page_ranks(n_in), delete_from_to(false) {
     full_row = new unsigned[n];
+    unsigned map_size = (n + (8 * sizeof(char)) - 1) / (8 * sizeof(char));
+    delete_map = new char[map_size];
+    for (unsigned i = 0; i < map_size; ++i) {
+        delete_map[i] = 0;
+    }
     page_ranks.shrink_to_fit();
     for (unsigned i = 0; i < n; ++i) {
         full_row[i] = i;
@@ -21,6 +26,11 @@ GoogleMatrix::GoogleMatrix(unsigned const n_in, unsigned const m,
                            unsigned* first_in, unsigned* second_in)
   : n(n_in), page_ranks(n_in) {
     full_row = new unsigned[n];
+    unsigned map_size = (n + (8 * sizeof(char)) - 1) / (8 * sizeof(char));
+    delete_map = new char[map_size];
+    for (unsigned i = 0; i < map_size; ++i) {
+        delete_map[i] = 0;
+    }
     page_ranks.shrink_to_fit();
     for (unsigned i = 0; i < n; ++i)
         full_row[i] = i;
@@ -60,12 +70,28 @@ GoogleMatrix::GoogleMatrix(unsigned const n_in, unsigned const m,
     std::cout << std::endl;
 }
 
+GoogleMatrix::~GoogleMatrix() {
+    if (delete_from_to) {
+        for (unsigned i = 0; i < n; ++i) {
+            if (delete_map[i / (8 * sizeof(char))] & (1 << (i % (8 * sizeof(char)))))
+                continue;
+            delete[] from_to[i];
+        }
+        delete[] from_to;
+        delete[] out_degrees;
+    }
+    delete[] full_row;    
+    delete[] delete_map;
+}
+
 void GoogleMatrix::convert_google() {
     for (unsigned i = 0; i < n; ++i) {
         if (out_degrees[i] == 0) {
             delete[] from_to[i];
             out_degrees[i] = n;
             from_to[i] = full_row;
+            auto asdf = i / (8 * sizeof(char));
+            delete_map[asdf] += 1 << (i % (8 * sizeof(char)));
             // Find a way to bitmap each row that uses full_row to
             // prevent double frees in the destructor
         }
