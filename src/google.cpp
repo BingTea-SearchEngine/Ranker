@@ -6,7 +6,7 @@ GoogleMatrix::GoogleMatrix(const std::string& filename) {}
 
 GoogleMatrix::GoogleMatrix(const unsigned n_in, unsigned** from_to_in, 
                            unsigned* out_degrees_in)
-  : n(n_in), from_to(from_to_in), page_ranks(n_in), delete_from_to(false) {
+  : n(n_in), from_to(from_to_in), out_degrees(out_degrees_in), page_ranks(n_in), delete_from_to(false) {
     full_row = new unsigned[n];
     unsigned map_size = (n + (8 * sizeof(char)) - 1) / (8 * sizeof(char));
     delete_map = new char[map_size];
@@ -80,7 +80,7 @@ GoogleMatrix::~GoogleMatrix() {
         delete[] from_to;
         delete[] out_degrees;
     }
-    delete[] full_row;    
+    delete[] full_row;
     delete[] delete_map;
 }
 
@@ -88,8 +88,14 @@ void GoogleMatrix::convert_google() {
     for (unsigned i = 0; i < n; ++i) {
         if (out_degrees[i] == 0) {
             delete[] from_to[i];
+            if (delete_from_to)
+                from_to[i] = full_row;
+            else {
+                from_to[i] = new unsigned[n];
+                for (unsigned j = 0; j < n; ++j)
+                    from_to[i][j] = j;
+            }
             out_degrees[i] = n;
-            from_to[i] = full_row;
             auto asdf = i / (8 * sizeof(char));
             delete_map[asdf] += 1 << (i % (8 * sizeof(char)));
             // Find a way to bitmap each row that uses full_row to
@@ -99,11 +105,6 @@ void GoogleMatrix::convert_google() {
 }
 
 void GoogleMatrix::iteration(double damping) {
-    std::cout << "START" << std::endl;
-    for (unsigned i = 0; i < page_ranks.size(); ++i) {
-        std::cout << page_ranks[i] << ' ';
-    }
-    std::cout << std::endl;
     Vector<double> original_page_ranks = page_ranks;
     for (unsigned i = 0; i < n; ++i) {
         page_ranks[i] = 0;
@@ -121,18 +122,11 @@ void GoogleMatrix::iteration(double damping) {
         page_ranks[i] *= damping;
         page_ranks[i] += (1 - damping) / n;
     }
-    std::cout << "END" << std::endl;
-    for (unsigned i = 0; i < page_ranks.size(); ++i) {
-        std::cout << page_ranks[i] << ' ';
-    }
-    std::cout << std::endl;
 }
 
 Vector<double> GoogleMatrix::pagerank(double damping) {
-    print(true);
-    for (unsigned i = 0; i < 50; ++i) {
+    for (unsigned i = 0; i < 50; ++i)
         iteration(damping);
-    }
     return page_ranks;
 }
 
@@ -142,9 +136,8 @@ void GoogleMatrix::print(bool adjacency) {
         for (unsigned i = 0; i < n; ++i) {
             unsigned next = -1;
             unsigned counter = 0;
-            if (out_degrees[i] != 0) {
+            if (out_degrees[i] != 0)
                 next = from_to[i][counter];
-            }
             for (unsigned j = 0; j < n; ++j) {
                 if (j == next) {
                     std::cout << 1. / out_degrees[i] << ' ';
