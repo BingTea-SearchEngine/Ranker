@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 class SparseNetwork {
-    private:
+    protected:
         bool delete_from_to = true;
         bool delete_communities = true;
         
