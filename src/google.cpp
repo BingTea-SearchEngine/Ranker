@@ -2,18 +2,33 @@
 
 GoogleMatrix::GoogleMatrix() {}
 
-GoogleMatrix::GoogleMatrix(const std::string& filename) {}
+GoogleMatrix::GoogleMatrix(const std::string& filename) {
+    read_bitstream(filename);
+    page_ranks = Vector<double>(n);
+    page_ranks.shrink_to_fit();
+    for (unsigned i = 0; i < n; ++i) {
+        page_ranks[i] = 1 / n;
+    }
+    unsigned map_size = (n + (8 * sizeof(char)) - 1) / (8 * sizeof(char));
+    delete_map = new char[map_size];
+    for (unsigned i = 0; i < map_size; ++i)
+        delete_map[i] = 0;
+    full_row = new unsigned[n];
+    for (unsigned i = 0; i < n; ++i)
+        full_row[i] = i;
+    convert_google();
+}
 
 GoogleMatrix::GoogleMatrix(const unsigned n_in, unsigned** from_to_in, 
                            unsigned* out_degrees_in)
   : n(n_in), from_to(from_to_in), out_degrees(out_degrees_in), page_ranks(n_in), delete_from_to(false) {
-    full_row = new unsigned[n];
+    page_ranks.shrink_to_fit();
     unsigned map_size = (n + (8 * sizeof(char)) - 1) / (8 * sizeof(char));
     delete_map = new char[map_size];
     for (unsigned i = 0; i < map_size; ++i) {
         delete_map[i] = 0;
     }
-    page_ranks.shrink_to_fit();
+    full_row = new unsigned[n];
     for (unsigned i = 0; i < n; ++i) {
         full_row[i] = i;
         quicksort(from_to[i], 0, out_degrees[i] - 1);
@@ -25,13 +40,13 @@ GoogleMatrix::GoogleMatrix(const unsigned n_in, unsigned** from_to_in,
 GoogleMatrix::GoogleMatrix(unsigned const n_in, unsigned const m,
                            unsigned* first_in, unsigned* second_in)
   : n(n_in), page_ranks(n_in) {
-    full_row = new unsigned[n];
+    page_ranks.shrink_to_fit();
     unsigned map_size = (n + (8 * sizeof(char)) - 1) / (8 * sizeof(char));
     delete_map = new char[map_size];
     for (unsigned i = 0; i < map_size; ++i) {
         delete_map[i] = 0;
     }
-    page_ranks.shrink_to_fit();
+    full_row = new unsigned[n];
     for (unsigned i = 0; i < n; ++i)
         full_row[i] = i;
     
