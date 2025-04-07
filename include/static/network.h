@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 class SparseNetwork {
-    protected:
+    private:
         bool delete_from_to = true;
         bool delete_communities = true;
         
@@ -70,7 +70,8 @@ class SparseNetwork {
         void fully_responsible();
         void delete_responsible();
         void print(bool adjacency);
-        void save(const std::string& filename);
+        void save_from_to(const std::string& filename);
+        void save_to_from(const std::string& filename);
 };
     
 #endif

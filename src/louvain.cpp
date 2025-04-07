@@ -268,8 +268,12 @@ const Vector<unsigned>& Louvain::get_reverse_communities() const {
     return final_reverse_communities;
 }
 
-void Louvain::save_network(const std::string& filename) {
-    network.save(filename);
+void Louvain::save_from_to(const std::string& filename) {
+    network.save_from_to(filename);
+}
+
+void Louvain::save_to_from(const std::string& filename) {
+    network.save_to_from(filename);
 }
 
 void Louvain::save_communities(const std::string& filename) {

@@ -449,8 +449,8 @@ void SparseNetwork::read_txt(const std::string& filename) {
 
 }
 
-void SparseNetwork::save(const std::string& filename) {
-std::ofstream ofs(filename, std::ios::binary);
+void SparseNetwork::save_from_to(const std::string& filename) {
+    std::ofstream ofs(filename, std::ios::binary);
     if (!ofs) {
         // handle error
         return;
@@ -459,6 +459,25 @@ std::ofstream ofs(filename, std::ios::binary);
         auto& row = from_to[i];
         // Write each integer in the row
         for (unsigned j = 0; j < out_degrees[i]; ++j) {
+            const auto& value = row[j];
+            ofs.write(reinterpret_cast<const char*>(&value), sizeof(value));
+        }
+        // Write sentinel
+        unsigned sentinel = -1;
+        ofs.write(reinterpret_cast<const char*>(&sentinel), sizeof(sentinel));
+    }
+}
+
+void SparseNetwork::save_to_from(const std::string& filename) {
+    std::ofstream ofs(filename, std::ios::binary);
+    if (!ofs) {
+        // handle error
+        return;
+    }
+    for (unsigned i = 0; i < n; ++i) {
+        auto& row = to_from[i];
+        // Write each integer in the row
+        for (unsigned j = 0; j < in_degrees[i]; ++j) {
             const auto& value = row[j];
             ofs.write(reinterpret_cast<const char*>(&value), sizeof(value));
         }
