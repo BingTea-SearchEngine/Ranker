@@ -2,6 +2,7 @@
 #define VECTOR_H
 
 #include <stdexcept>
+#include "static/algorithm.h"
 
 template <typename T> 
 class Vector {
@@ -138,6 +139,10 @@ class Vector {
 
         T* data() {
             return array;
+        }
+
+        void sort() {
+            quicksort(array, 0, _size - 1);
         }
 };
 
