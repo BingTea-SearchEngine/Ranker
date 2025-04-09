@@ -273,12 +273,17 @@ void Louvain::save_to_from(const std::string& filename) {
     network.save_to_from(filename);
 }
 
-void Louvain::save_communities(const std::string& filename) {
-    throw std::logic_error("not implemented");
+void Louvain::save_communities(const Vector<std::string>& filenames) {
+    if (filenames.size() != final_communities.size())
+        throw std::invalid_argument("Invalid number of filenames.");
+
+    for (unsigned i = 0; i < filenames.size(); ++i) {
+        save_1D(final_communities[i].data(), final_communities[i].size(), filenames[i]);
+    }
 }
 
 void Louvain::save_reverse_communities(const std::string& filename) {
-    throw std::logic_error("not implemented");
+    save_1D(final_reverse_communities.data(), final_reverse_communities.size(), filename);
 }
 
 // THIS REQUIRES THE COMMUNITIES TO HAVE BEEN SET BY SET_COMMUNITIES,
