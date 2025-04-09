@@ -11,7 +11,6 @@ Louvain::Louvain(const std::string& filename)
     for (unsigned i = 0; i < network.n; ++i) {
         final_reverse_communities[i] = i;
     }
-    network.print(true);
     new_num_comm = -1;
 }
 
@@ -24,7 +23,6 @@ Louvain::Louvain(const unsigned n_in, const unsigned m_in,
     for (unsigned i = 0; i < n_in; ++i) {
         final_reverse_communities[i] = i;
     }
-    network.print(true);
 }
 
 Louvain::Louvain(unsigned const n_in, const unsigned m_in,
@@ -36,7 +34,6 @@ Louvain::Louvain(unsigned const n_in, const unsigned m_in,
     for (unsigned i = 0; i < n_in; ++i) {
         final_reverse_communities[i] = i;
     }
-    network.print(true);
 }
 
 Louvain::~Louvain() {}
@@ -282,4 +279,68 @@ void Louvain::save_communities(const std::string& filename) {
 
 void Louvain::save_reverse_communities(const std::string& filename) {
     throw std::logic_error("not implemented");
+}
+
+// THIS REQUIRES THE COMMUNITIES TO HAVE BEEN SET BY SET_COMMUNITIES,
+// BECAUSE RUNNING LOUVAIN NORMALLY MERGES THE NODES SO IT'S IMPOSSIBLE
+// TO GET THE ORIGINAL NETWORK BACK. I PURPOSEFULLY MODIFY THE ORIGINAL
+// TO SAVE MEMORY. SET_COMMUNITIES DOESN'T SET LOUVAIN VARIABLES, ONLY
+// THE UNDERLYING NETWORK VARIABLES. THIS IS A BAD IDEA.
+void Louvain::save_partitions(const Vector<std::string>& filenames) {
+    // this is kind of terrible. I can't be bothered to make it not
+    // terrible. I think this works, but I haven't extensively tested
+    // it.
+    if (filenames.size() != network.num_communities)
+        throw std::invalid_argument("Invalid number of filenames.");
+
+    for (unsigned i = 0; i < network.num_communities; ++i) {
+        unsigned community_size = network.communities[i].size();
+        unsigned* map = new unsigned[network.n];
+        for (unsigned j = 0; j < community_size; ++j) {
+            auto qwer = network.communities[i][j];
+            map[network.communities[i][j]] = j;
+        }
+        
+        unsigned* out_degrees = new unsigned[community_size];
+        for (unsigned j = 0; j < community_size; ++j) {
+            out_degrees[j] = 0;
+            unsigned node = network.communities[i][j];
+            for (unsigned k = 0; k < network.out_degrees[node]; ++k) {
+                unsigned other_node = network.from_to[node][k];
+                if (network.reverse_communities[node] != network.reverse_communities[other_node])
+                    continue;
+                
+                out_degrees[j]++;
+            }
+        }
+        
+        Vector<unsigned>* from_to = new Vector<unsigned>[community_size];
+        for (unsigned j = 0; j < community_size; ++j) {
+            unsigned node = network.communities[i][j];
+            for (unsigned k = 0; k < network.out_degrees[node]; ++k) {
+                unsigned other_node = network.from_to[node][k];
+                if (network.reverse_communities[node] != network.reverse_communities[other_node])
+                    continue;
+                from_to[j].push_back(map[other_node]);
+            }
+            from_to[j].shrink_to_fit();
+        }
+
+        unsigned** raw_from_to = new unsigned*[community_size];
+        for (unsigned j = 0; j < community_size; ++j) {
+            raw_from_to[j] = from_to[j].data();
+        }
+
+        save_2D(raw_from_to, community_size, out_degrees, filenames[i]);
+        delete[] raw_from_to;
+        delete[] from_to;
+        delete[] map;
+        delete[] out_degrees;
+    }
+}
+
+// FOR NOW THIS IS ONLY USED BEFORE SAVE_PARTITIONS. IT ONLY SETS THE
+// BARE NECESSITIES LOUVAIN WON'T BE FUNCTIONAL AFTER THIS IS CALLED
+void Louvain::set_communities(unsigned* reverse_communities) {
+    network.set_communities(reverse_communities);
 }

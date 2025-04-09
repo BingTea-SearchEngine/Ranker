@@ -219,6 +219,7 @@ void SparseNetwork::set_communities(unsigned* reverse_communities_in) {
     delete[] community_out_weights;
     delete_communities = false;
     reverse_communities = reverse_communities_in;
+    num_communities = 0;
 
     for (unsigned i = 0; i < n; ++i) {
         unsigned community = reverse_communities_in[i];
@@ -450,41 +451,11 @@ void SparseNetwork::read_txt(const std::string& filename) {
 }
 
 void SparseNetwork::save_from_to(const std::string& filename) {
-    std::ofstream ofs(filename, std::ios::binary);
-    if (!ofs) {
-        // handle error
-        return;
-    }
-    for (unsigned i = 0; i < n; ++i) {
-        auto& row = from_to[i];
-        // Write each integer in the row
-        for (unsigned j = 0; j < out_degrees[i]; ++j) {
-            const auto& value = row[j];
-            ofs.write(reinterpret_cast<const char*>(&value), sizeof(value));
-        }
-        // Write sentinel
-        unsigned sentinel = -1;
-        ofs.write(reinterpret_cast<const char*>(&sentinel), sizeof(sentinel));
-    }
+    save_2D(from_to, n, out_degrees, filename);
 }
 
 void SparseNetwork::save_to_from(const std::string& filename) {
-    std::ofstream ofs(filename, std::ios::binary);
-    if (!ofs) {
-        // handle error
-        return;
-    }
-    for (unsigned i = 0; i < n; ++i) {
-        auto& row = to_from[i];
-        // Write each integer in the row
-        for (unsigned j = 0; j < in_degrees[i]; ++j) {
-            const auto& value = row[j];
-            ofs.write(reinterpret_cast<const char*>(&value), sizeof(value));
-        }
-        // Write sentinel
-        unsigned sentinel = -1;
-        ofs.write(reinterpret_cast<const char*>(&sentinel), sizeof(sentinel));
-    }
+    save_2D(to_from, n, in_degrees, filename);
 }
 
 void SparseNetwork::construct_with_from_to(bool responsible) {
