@@ -137,6 +137,14 @@ class Vector {
             return array[index];
         }
 
+        const T& operator[](unsigned index) const {
+            if (index >= _size) {
+                throw std::out_of_range("Index out of bounds");
+            }
+        
+            return array[index];
+        }
+
         T* data() {
             return array;
         }
