@@ -137,6 +137,22 @@ public:
     }
 };
 
+inline void save_1D(unsigned* array, unsigned size, const std::string& filename) {
+    std::ofstream ofs(filename, std::ios::binary);
+    if (!ofs) {
+        // handle error
+        return;
+    }
+
+    for (unsigned i = 0; i < size; ++i) {
+        const auto& value = array[i];
+        ofs.write(reinterpret_cast<const char*>(&value), sizeof(value));
+    }
+    // Write sentinel
+    unsigned sentinel = -1;
+    ofs.write(reinterpret_cast<const char*>(&sentinel), sizeof(sentinel));
+}
+
 //template <typename T> if this isn't unsigned ints, it don't be readable
 inline void save_2D(unsigned** array, unsigned num_rows, unsigned* sizes, const std::string& filename) {
     std::ofstream ofs(filename, std::ios::binary);
