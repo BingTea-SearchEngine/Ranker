@@ -1,6 +1,9 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
 
+#include <string>
+#include <fstream>
+
 template <typename T>
 int binary_search(T* values, T& target, unsigned size) {
     int left = 0;
@@ -133,5 +136,25 @@ public:
         }
     }
 };
+
+//template <typename T> if this isn't unsigned ints, it don't be readable
+inline void save_2D(unsigned** array, unsigned num_rows, unsigned* sizes, const std::string& filename) {
+    std::ofstream ofs(filename, std::ios::binary);
+    if (!ofs) {
+        // handle error
+        return;
+    }
+    for (unsigned i = 0; i < num_rows; ++i) {
+        auto& row = array[i];
+        // Write each value in the row
+        for (unsigned j = 0; j < sizes[i]; ++j) {
+            const auto& value = row[j];
+            ofs.write(reinterpret_cast<const char*>(&value), sizeof(value));
+        }
+        // Write sentinel
+        unsigned sentinel = -1;
+        ofs.write(reinterpret_cast<const char*>(&sentinel), sizeof(sentinel));
+    }
+}
 
 #endif
