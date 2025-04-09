@@ -76,7 +76,6 @@ void Louvain::phase1() {
         final_reverse_communities[i] = network.reverse_communities[final_reverse_communities[i]];
     }
 
-    std::cout << new_modularity << std::endl;
     network.print(true);
 }
 
@@ -347,5 +346,27 @@ void Louvain::save_partitions(const Vector<std::string>& filenames) {
 // FOR NOW THIS IS ONLY USED BEFORE SAVE_PARTITIONS. IT ONLY SETS THE
 // BARE NECESSITIES LOUVAIN WON'T BE FUNCTIONAL AFTER THIS IS CALLED
 void Louvain::set_communities(unsigned* reverse_communities) {
-    network.set_communities(reverse_communities);
+    network.set_communities(reverse_communities, false);
+}
+
+void Louvain::set_communities(const std::string& filename) {
+    std::ifstream ifs(filename, std::ios::binary);
+    if (!ifs) {
+        // handle error
+        throw std::runtime_error("file does not exist, is empty, or is badly formatted");
+    }
+
+    Vector<unsigned> communities;
+    while (ifs.eof() == false) {
+        unsigned value;
+        ifs.read(reinterpret_cast<char*>(&value), sizeof(value));
+        communities.push_back(value);
+    }
+
+    unsigned* raw_communities = new unsigned[communities.size()];
+    for (unsigned i = 0; i < communities.size(); ++i) {
+        raw_communities[i] = communities[i];
+    }
+
+    network.set_communities(raw_communities, true);
 }

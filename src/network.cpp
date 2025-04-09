@@ -212,12 +212,12 @@ double SparseNetwork::community_modularity(unsigned community) {
     return total / m;
 }
 
-void SparseNetwork::set_communities(unsigned* reverse_communities_in) {
+void SparseNetwork::set_communities(unsigned* reverse_communities_in, bool delete_communities_in) {
     delete[] reverse_communities;
     delete[] communities;
     delete[] community_in_weights;
     delete[] community_out_weights;
-    delete_communities = false;
+    delete_communities = delete_communities_in;
     reverse_communities = reverse_communities_in;
     num_communities = 0;
 

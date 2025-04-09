@@ -30,12 +30,13 @@ class Louvain {
         ~Louvain();
         void partition();
         void set_communities(unsigned* reverse_communities);
+        void set_communities(const std::string& filename);
         const Vector<Vector<unsigned>>& get_communities() const;
         const Vector<unsigned>& get_reverse_communities() const;
         void save_from_to(const std::string& filename);
         void save_to_from(const std::string& filename);
-        void save_communities(const Vector<std::string>& filenames);
-        void save_reverse_communities(const std::string& filename);
+        void save_communities(const Vector<std::string>& filenames); // THESE REQUIRE LOUVAIN VARIABLES, SO NO SET_COMMUNITIES()!!!
+        void save_reverse_communities(const std::string& filename); // THESE REQUIRE LOUVAIN VARIABLES, SO NO SET_COMMUNITIES()!!!
         void save_partitions(const Vector<std::string>& filenames);
 };
 

@@ -65,7 +65,7 @@ class SparseNetwork {
         void add_to_community(unsigned node, unsigned community);
         unsigned remove_from_community(unsigned community);
         double community_modularity(unsigned community);
-        void set_communities(unsigned* reverse_communities);
+        void set_communities(unsigned* reverse_communities, bool delete_communities);
         double modularity_diff(unsigned node, unsigned community);
         void fully_responsible();
         void delete_responsible();
