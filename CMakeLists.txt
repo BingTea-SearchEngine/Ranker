@@ -7,6 +7,7 @@ src/pagerank.cpp src/tree.cpp src/xgboost.cpp src/google.cpp)
 
 target_include_directories(Ranker PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
+find_package(xgboost REQUIRED)
 add_executable(Runner src/main.cpp)
 
-target_link_libraries(Runner PUBLIC Ranker)
+target_link_libraries(Runner PUBLIC Ranker xgboost::xgboost)
