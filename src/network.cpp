@@ -241,10 +241,6 @@ void SparseNetwork::set_communities(unsigned* reverse_communities_in, bool delet
         community_in_weights[community] += in_weights[i];
         community_out_weights[community] += out_weights[i];
     }
-
-    for (unsigned i = 0; i < num_communities; ++i) {
-        communities[i].print_inorder();
-    }
 }
 
 double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
