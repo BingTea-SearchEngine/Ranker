@@ -7,7 +7,7 @@ GoogleMatrix::GoogleMatrix(const std::string& filename) {
     page_ranks = Vector<double>(n);
     page_ranks.shrink_to_fit();
     for (unsigned i = 0; i < n; ++i) {
-        page_ranks[i] = 1 / n;
+        page_ranks[i] = 1. / n;
     }
     unsigned map_size = (n + (8 * sizeof(char)) - 1) / (8 * sizeof(char));
     delete_map = new char[map_size];
@@ -32,7 +32,7 @@ GoogleMatrix::GoogleMatrix(const unsigned n_in, unsigned** from_to_in,
     for (unsigned i = 0; i < n; ++i) {
         full_row[i] = i;
         quicksort(from_to[i], 0, out_degrees[i] - 1);
-        page_ranks[i] = 1 / n;
+        page_ranks[i] = 1. / n;
     }
     convert_google();
 }
@@ -140,7 +140,7 @@ void GoogleMatrix::iteration(double damping) {
 }
 
 Vector<double> GoogleMatrix::pagerank(double damping) {
-    for (unsigned i = 0; i < 50; ++i)
+    for (unsigned i = 0; i < 75; ++i)
         iteration(damping);
     return page_ranks;
 }
