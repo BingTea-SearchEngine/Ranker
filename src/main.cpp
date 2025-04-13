@@ -11,35 +11,53 @@
 #include <cassert>
 #include <cstdlib>
 #include <deque>
+#include <xgboost/c_api.h>
+#include "static/google.h"
 
 int main() {
-    unsigned* first = new unsigned[11]{0, 1, 2, 3, 0, 4, 5, 6, 7, 1, 6};
-    unsigned* second = new unsigned[11]{1, 2, 3, 0, 2, 5, 6, 7, 4, 4, 2};
-    //SparseNetwork network(8, 11, first, second);
-    //unsigned* communities = new unsigned[8]{2, 0, 0, 0, 1, 1, 1, 1};
-    //network.set_communities(communities);
-    Louvain louvain(8, 11, first, second);
-    louvain.phase1();
-    louvain.phase2();
-    //auto modularity = network.modularity();
-    //network.add_to_community(0, 0);
-    //std::cout << "modularity " << modularity << std::endl;
-    delete[] first;
-    delete[] second;
-    //delete[] communities;
+    /*
+    Louvain louvain("../data/real.network");
+    louvain.save_to_from("../data/real_tf.network"); // For CheiRank
+
+    louvain.partition();
+    std::cout << "modularity " << louvain.modularity() << std::endl;
+    auto communities = louvain.get_communities();
+    auto reverse_communities = louvain.get_reverse_communities();
+
+    // Save communities to file
+    louvain.save_reverse_communities("../data/real.rcomm");
+    Vector<std::string> filenames;
+    for (unsigned i = 0; i < communities.size(); ++i) {
+        filenames.push_back("../data/communities/" + std::to_string(i) + ".comm");
+    }
+    louvain.save_communities(filenames);
+    */
+    
+
+    /*
+    Louvain louvain("../data/real.network");
+    louvain.set_communities("../data/real.rcomm");
+    std::cout << louvain.modularity() << std::endl;
+    Vector<std::string> filenames;
+    for (unsigned i = 0; i < louvain.num_communities(); ++i) {
+        filenames.push_back("../data/communities/" + std::to_string(i) + ".network");
+    }
+    louvain.save_partitions(filenames);
+    */
+
+    /*
+    GoogleMatrix google("../data/real.network");
+    auto pagerank = google.pagerank(0.85);
+    for (unsigned i = 0; i < pagerank.size(); ++i) {
+        std::cout << pagerank[i] << std::endl;
+    }
+    */
+
+    /*
+    GoogleMatrix google("../data/real_tf.network");
+    auto cheirank = google.pagerank(0.85);
+    for (unsigned i = 0; i < cheirank.size(); ++i) {
+        std::cout << cheirank[i] << std::endl;
+    }
+    */
 }
-
-/*
-
-0  1  1  0  0  0  0  0
-0  0  1  0  1  0  0  0
-0  0  0  1  0  0  0  0
-1  0  0  0  0  0  0  0
-0  0  0  0  0  1  0  0
-0  0  0  0  0  0  1  0
-0  0  1  0  0  0  0  1
-0  0  0  0  1  0  0  0
-
-2 6 1 6
-
-*/
