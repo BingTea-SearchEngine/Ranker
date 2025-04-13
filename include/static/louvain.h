@@ -38,6 +38,8 @@ class Louvain {
         void save_communities(const Vector<std::string>& filenames); // THESE REQUIRE LOUVAIN VARIABLES, SO NO SET_COMMUNITIES()!!!
         void save_reverse_communities(const std::string& filename); // THESE REQUIRE LOUVAIN VARIABLES, SO NO SET_COMMUNITIES()!!!
         void save_partitions(const Vector<std::string>& filenames);
+        double modularity();
+        unsigned num_communities();
 };
 
 #endif

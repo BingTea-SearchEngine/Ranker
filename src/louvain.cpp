@@ -75,14 +75,11 @@ void Louvain::phase1() {
     for (unsigned i = 0; i < original_n; ++i) {
         final_reverse_communities[i] = network.reverse_communities[final_reverse_communities[i]];
     }
-
-    network.print(true);
 }
 
 void Louvain::phase2() {
     reindex_communities();
     merge_communities();
-    network.print(true);
 }
 
 void Louvain::merge_communities() {
@@ -189,7 +186,6 @@ void Louvain::merge_communities() {
         reverse_communities[i] = i;
     }
 
-
     network.n = new_num_comm;
     network.num_communities = new_num_comm;
     network.to_from = to_from;
@@ -294,8 +290,10 @@ void Louvain::save_partitions(const Vector<std::string>& filenames) {
     // this is kind of terrible. I can't be bothered to make it not
     // terrible. I think this works, but I haven't extensively tested
     // it.
-    if (filenames.size() != network.num_communities)
+    if (filenames.size() != network.num_communities) {
+        std::cout << filenames.size() << ' ' << network.num_communities << std::endl;
         throw std::invalid_argument("Invalid number of filenames.");
+    }
 
     for (unsigned i = 0; i < network.num_communities; ++i) {
         unsigned community_size = network.communities[i].size();
@@ -369,4 +367,12 @@ void Louvain::set_communities(const std::string& filename) {
     }
 
     network.set_communities(raw_communities, true);
+}
+
+double Louvain::modularity() {
+    return network.modularity();
+}
+
+unsigned Louvain::num_communities() {
+    return network.num_communities;
 }
