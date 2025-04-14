@@ -210,7 +210,7 @@ void GoogleMatrix::read_txt(const std::string& filename) {
 
 }
 
-void GoogleMatrix::save(const std::string& filename) {
+void GoogleMatrix::dump(const std::string& filename) {
     std::ofstream ofs(filename, std::ios::binary);
     if (!ofs) {
         // handle error

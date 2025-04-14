@@ -260,33 +260,33 @@ const Vector<unsigned>& Louvain::get_reverse_communities() const {
     return final_reverse_communities;
 }
 
-void Louvain::save_from_to(const std::string& filename) {
-    network.save_from_to(filename);
+void Louvain::dump_from_to(const std::string& filename) {
+    network.dump_from_to(filename);
 }
 
-void Louvain::save_to_from(const std::string& filename) {
-    network.save_to_from(filename);
+void Louvain::dump_to_from(const std::string& filename) {
+    network.dump_to_from(filename);
 }
 
-void Louvain::save_communities(const Vector<std::string>& filenames) {
+void Louvain::dump_communities(const Vector<std::string>& filenames) {
     if (filenames.size() != final_communities.size())
         throw std::invalid_argument("Invalid number of filenames.");
 
     for (unsigned i = 0; i < filenames.size(); ++i) {
-        save_1D(final_communities[i].data(), final_communities[i].size(), filenames[i]);
+        dump_1D(final_communities[i].data(), final_communities[i].size(), filenames[i]);
     }
 }
 
-void Louvain::save_reverse_communities(const std::string& filename) {
-    save_1D(final_reverse_communities.data(), final_reverse_communities.size(), filename);
+void Louvain::dump_reverse_communities(const std::string& filename) {
+    dump_1D(final_reverse_communities.data(), final_reverse_communities.size(), filename);
 }
 
 // THIS REQUIRES THE COMMUNITIES TO HAVE BEEN SET BY SET_COMMUNITIES,
 // BECAUSE RUNNING LOUVAIN NORMALLY MERGES THE NODES SO IT'S IMPOSSIBLE
 // TO GET THE ORIGINAL NETWORK BACK. I PURPOSEFULLY MODIFY THE ORIGINAL
-// TO SAVE MEMORY. SET_COMMUNITIES DOESN'T SET LOUVAIN VARIABLES, ONLY
+// TO DUMP MEMORY. SET_COMMUNITIES DOESN'T SET LOUVAIN VARIABLES, ONLY
 // THE UNDERLYING NETWORK VARIABLES. THIS IS A BAD IDEA.
-void Louvain::save_partitions(const Vector<std::string>& filenames) {
+void Louvain::dump_partitions(const Vector<std::string>& filenames) {
     // this is kind of terrible. I can't be bothered to make it not
     // terrible. I think this works, but I haven't extensively tested
     // it.
@@ -333,7 +333,7 @@ void Louvain::save_partitions(const Vector<std::string>& filenames) {
             raw_from_to[j] = from_to[j].data();
         }
 
-        save_2D(raw_from_to, community_size, out_degrees, filenames[i]);
+        dump_2D(raw_from_to, community_size, out_degrees, filenames[i]);
         delete[] raw_from_to;
         delete[] from_to;
         delete[] map;
@@ -341,7 +341,7 @@ void Louvain::save_partitions(const Vector<std::string>& filenames) {
     }
 }
 
-// FOR NOW THIS IS ONLY USED BEFORE SAVE_PARTITIONS. IT ONLY SETS THE
+// FOR NOW THIS IS ONLY USED BEFORE dump_PARTITIONS. IT ONLY SETS THE
 // BARE NECESSITIES LOUVAIN WON'T BE FUNCTIONAL AFTER THIS IS CALLED
 void Louvain::set_communities(unsigned* reverse_communities) {
     network.set_communities(reverse_communities, false);
