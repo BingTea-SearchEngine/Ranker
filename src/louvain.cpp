@@ -1,5 +1,4 @@
 #include "static/louvain.h"
-#include "static/algorithm.h"
 
 Louvain::Louvain() {}
 

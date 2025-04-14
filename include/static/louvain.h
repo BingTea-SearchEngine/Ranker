@@ -3,6 +3,7 @@
 
 #include "static/network.h"
 #include "static/vector.h"
+#include "static/algorithm.h"
 #include <string>
 
 class Louvain {
