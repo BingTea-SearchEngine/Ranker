@@ -13,6 +13,7 @@
 #include <deque>
 #include <xgboost/c_api.h>
 #include "static/google.h"
+#include "cmph.h"
 
 int main() {
     /*

@@ -5,9 +5,12 @@ project(Ranker)
 add_library(Ranker STATIC src/louvain.cpp src/network.cpp src/node.cpp 
 src/pagerank.cpp src/tree.cpp src/xgboost.cpp src/google.cpp)
 
+file(GLOB cmph_src "cmph-2.0/src/*.c" "cmph-2.0/src/*.h")
+add_library(CMPH STATIC ${cmph_src})
+
 target_include_directories(Ranker PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 find_package(xgboost REQUIRED)
 add_executable(Runner src/main.cpp)
 
-target_link_libraries(Runner PUBLIC Ranker xgboost::xgboost)
+target_link_libraries(Runner PUBLIC Ranker xgboost::xgboost CMPH)
