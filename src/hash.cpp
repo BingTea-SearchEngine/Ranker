@@ -6,7 +6,7 @@ URLHash::URLHash(const Vector<std::string>& filenames) {
     std::vector<char*> urls;
     for (unsigned i = 0; i < filenames.size(); ++i) {
         // Open the file
-        std::ifstream in("../data/urls.txt");
+        std::ifstream in(filenames[i]);
         if (!in) {
             std::cerr << "Error opening file." << std::endl;
             return;
@@ -30,7 +30,6 @@ URLHash::URLHash(const Vector<std::string>& filenames) {
     cmph_config_set_algo(config, CMPH_CHD);
     hash = cmph_new(config);
     cmph_io_vector_adapter_destroy(source);
-    cmph_config_destroy(config);
 
     for (unsigned i = 0; i < nkeys; ++i) {
         delete[] urls[i];
@@ -43,7 +42,7 @@ URLHash::URLHash(const Vector<std::string>& filenames, unsigned num_pages)
     unsigned index = 0;
     for (unsigned i = 0; i < filenames.size(); ++i) {
         // Open the file
-        std::ifstream in("../data/urls.txt");
+        std::ifstream in(filenames[i]);
         if (!in) {
             std::cerr << "Error opening file." << std::endl;
             return;
@@ -65,7 +64,6 @@ URLHash::URLHash(const Vector<std::string>& filenames, unsigned num_pages)
     cmph_config_set_algo(config, CMPH_CHD);
     hash = cmph_new(config);
     cmph_io_vector_adapter_destroy(source);
-    cmph_config_destroy(config);
 
     for (unsigned i = 0; i < nkeys; ++i) {
         delete[] urls[i];
@@ -82,6 +80,7 @@ URLHash::URLHash(const std::string& filename) {
 
 URLHash::~URLHash() {
     cmph_destroy(hash);
+    cmph_config_destroy(config);
 }
 
 void URLHash::dump(const std::string& filename) {
@@ -95,7 +94,7 @@ void URLHash::test(const Vector<std::string>& filenames, const std::string& file
     std::vector<char*> urls;
     for (unsigned i = 0; i < filenames.size(); ++i) {
         // Open the file
-        std::ifstream in("../data/urls.txt");
+        std::ifstream in(filenames[i]);
         if (!in) {
             std::cerr << "Error opening file." << std::endl;
             return;
