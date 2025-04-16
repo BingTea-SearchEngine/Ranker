@@ -70,8 +70,8 @@ class SparseNetwork {
         void fully_responsible();
         void delete_responsible();
         void print(bool adjacency);
-        void save_from_to(const std::string& filename);
-        void save_to_from(const std::string& filename);
+        void dump_from_to(const std::string& filename);
+        void dump_to_from(const std::string& filename);
 };
     
 #endif

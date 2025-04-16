@@ -3,6 +3,7 @@
 
 #include "static/network.h"
 #include "static/vector.h"
+#include "static/algorithm.h"
 #include <string>
 
 class Louvain {
@@ -33,11 +34,13 @@ class Louvain {
         void set_communities(const std::string& filename);
         const Vector<Vector<unsigned>>& get_communities() const;
         const Vector<unsigned>& get_reverse_communities() const;
-        void save_from_to(const std::string& filename);
-        void save_to_from(const std::string& filename);
-        void save_communities(const Vector<std::string>& filenames); // THESE REQUIRE LOUVAIN VARIABLES, SO NO SET_COMMUNITIES()!!!
-        void save_reverse_communities(const std::string& filename); // THESE REQUIRE LOUVAIN VARIABLES, SO NO SET_COMMUNITIES()!!!
-        void save_partitions(const Vector<std::string>& filenames);
+        void dump_from_to(const std::string& filename);
+        void dump_to_from(const std::string& filename);
+        void dump_communities(const Vector<std::string>& filenames); // THESE REQUIRE LOUVAIN VARIABLES, SO NO SET_COMMUNITIES()!!!
+        void dump_reverse_communities(const std::string& filename); // THESE REQUIRE LOUVAIN VARIABLES, SO NO SET_COMMUNITIES()!!!
+        void dump_partitions(const Vector<std::string>& filenames);
+        double modularity();
+        unsigned num_communities();
 };
 
 #endif

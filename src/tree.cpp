@@ -108,7 +108,7 @@ SplitInfo Tree::best_split(unsigned num_rows, unsigned num_cols,
 
             double total_loss = left_loss + right_loss;
             
-            // Save the best split
+            // Dump the best split
             if (total_loss < lowest_loss) {
                 lowest_loss = total_loss;
                 split.attribute = col_idx;

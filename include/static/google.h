@@ -32,7 +32,7 @@ class GoogleMatrix {
         ~GoogleMatrix();
         Vector<double> pagerank(double damping);
         void print(bool adjacency);
-        void save(const std::string& filename);
+        void dump(const std::string& filename);
 };
 
 #endif

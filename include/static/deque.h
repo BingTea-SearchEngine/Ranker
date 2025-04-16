@@ -52,7 +52,7 @@ class Deque {
             if (capacity_in <= _size)
                 return;
 
-            T* new_circle = new T[capacity_in];
+            T* new_circle = new T[capacity_in](); // These aren't needed, they're just here to shut up valgrind
 
             for (unsigned i = 0; i < _size; ++i) {
                 new_circle[i] = circle[(i + _front) % _capacity];
@@ -69,7 +69,7 @@ class Deque {
             if (_size == _capacity)
                 return;
 
-            T* new_circle = new T[_size];
+            T* new_circle = new T[_size](); // These aren't needed, they're just here to shut up valgrind
             for (unsigned i = 0; i < _size; ++i) {
                 new_circle[i] = this->operator[](i);
             }
@@ -91,7 +91,7 @@ class Deque {
 
         void push_front(const T& value) {
             if (_size == 0) {
-                circle[0] = value;
+                circle[_front] = value;
                 _size++;
                 return;
             }
@@ -107,7 +107,7 @@ class Deque {
 
         void push_back(const T& value) {
             if (_size == 0) {
-                circle[0] = value;
+                circle[_front] = value;
                 _size++;
                 return;
             }

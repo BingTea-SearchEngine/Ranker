@@ -241,10 +241,6 @@ void SparseNetwork::set_communities(unsigned* reverse_communities_in, bool delet
         community_in_weights[community] += in_weights[i];
         community_out_weights[community] += out_weights[i];
     }
-
-    for (unsigned i = 0; i < num_communities; ++i) {
-        communities[i].print_inorder();
-    }
 }
 
 double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
@@ -450,12 +446,12 @@ void SparseNetwork::read_txt(const std::string& filename) {
 
 }
 
-void SparseNetwork::save_from_to(const std::string& filename) {
-    save_2D(from_to, n, out_degrees, filename);
+void SparseNetwork::dump_from_to(const std::string& filename) {
+    dump_2D(from_to, n, out_degrees, filename);
 }
 
-void SparseNetwork::save_to_from(const std::string& filename) {
-    save_2D(to_from, n, in_degrees, filename);
+void SparseNetwork::dump_to_from(const std::string& filename) {
+    dump_2D(to_from, n, in_degrees, filename);
 }
 
 void SparseNetwork::construct_with_from_to(bool responsible) {

@@ -145,6 +145,22 @@ class Vector {
             return array[index];
         }
 
+        T& front() {
+            return array[0];
+        }
+
+        const T& front() const {
+            return array[0];
+        }
+
+        T& back() {
+            return array[size - 1];
+        }
+
+        const T& back() const {
+            return array[size - 1];
+        }
+
         T* data() {
             return array;
         }

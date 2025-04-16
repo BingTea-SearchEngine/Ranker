@@ -137,7 +137,7 @@ public:
     }
 };
 
-inline void save_1D(unsigned* array, unsigned size, const std::string& filename) {
+inline void dump_1D(unsigned* array, unsigned size, const std::string& filename) {
     std::ofstream ofs(filename, std::ios::binary);
     if (!ofs) {
         // handle error
@@ -151,7 +151,7 @@ inline void save_1D(unsigned* array, unsigned size, const std::string& filename)
 }
 
 //template <typename T> if this isn't unsigned ints, it wouldn't be readable
-inline void save_2D(unsigned** array, unsigned num_rows, unsigned* sizes, const std::string& filename) {
+inline void dump_2D(unsigned** array, unsigned num_rows, unsigned* sizes, const std::string& filename) {
     std::ofstream ofs(filename, std::ios::binary);
     if (!ofs) {
         // handle error
