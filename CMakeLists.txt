@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22.1)
 project(Ranker)
 
 add_library(Ranker STATIC src/louvain.cpp src/network.cpp src/node.cpp 
-src/pagerank.cpp src/tree.cpp src/xgboost.cpp src/google.cpp)
+src/pagerank.cpp src/tree.cpp src/xgboost.cpp src/google.cpp src/hash.cpp)
 
 file(GLOB cmph_src "cmph-2.0/src/*.c" "cmph-2.0/src/*.h")
 add_library(CMPH STATIC ${cmph_src})

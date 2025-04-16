@@ -1,3 +1,4 @@
+/*
 #ifdef WIN32
 #include "wingetopt.h"
 #else
@@ -340,3 +341,4 @@ int main(int argc, char **argv)
 	return ret;
 
 }
+*/
