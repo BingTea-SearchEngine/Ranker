@@ -170,4 +170,14 @@ inline void dump_2D(unsigned** array, unsigned num_rows, unsigned* sizes, const 
     }
 }
 
+template <typename T>
+const T& max(T& first, T& second) {
+    return (first < second) ? second: first;
+}
+
+template <typename T>
+const T& min(T& first, T& second) {
+    return (first < second) ? first: second;
+}
+
 #endif
