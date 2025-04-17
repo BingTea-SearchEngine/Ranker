@@ -87,6 +87,14 @@ class Vector {
             _size = size_in;
         }
 
+        void resize(unsigned size_in, const T& value) {
+            unsigned old_size = _size;
+            resize(size_in);
+            for (unsigned i = old_size; i < _size; ++i) {
+                array[i] = value;
+            }
+        }
+
         void shrink_to_fit() {
             if (_capacity == _size)
                 return;
@@ -154,11 +162,11 @@ class Vector {
         }
 
         T& back() {
-            return array[size - 1];
+            return array[_size - 1];
         }
 
         const T& back() const {
-            return array[size - 1];
+            return array[_size - 1];
         }
 
         T* data() {
