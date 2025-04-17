@@ -1,13 +1,13 @@
 import requests
 import pickle
 
-with open('data/credentials.txt', 'r') as f:
+with open('../data/credentials.txt', 'r') as f:
     api_key, cse_id = f.read().split()
     
-with open('data/google.pkl', 'rb') as f:
+with open('../data/google.pkl', 'rb') as f:
     responses = pickle.load(f)
 
-with open('data/searches.txt', 'r') as f:
+with open('../data/searches.txt', 'r') as f:
     searches = f.read().splitlines()
     
 def google_search(query, num_results=10):
@@ -24,8 +24,9 @@ def google_search(query, num_results=10):
 
 for search in searches:
     if search not in responses:
+        print("Searching:", search)
         response = google_search(search)
         responses[search] = response
         
-with open('data/google.pkl', 'wb') as f:
+with open('../data/google.pkl', 'wb') as f:
     pickle.dump(responses, f)
