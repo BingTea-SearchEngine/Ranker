@@ -99,7 +99,7 @@ const unsigned URLHash::operator[](std::string key) const {
     return operator[](c_key);
 }
 
-void URLHash::print_hash(const char* filename) {
+void URLHash::print(const char* filename) {
     Vector<char*> urls;
     std::ifstream ifs(filename);
     if (!ifs) {
@@ -123,6 +123,6 @@ void URLHash::print_hash(const char* filename) {
     }
 }
 
-void URLHash::print_hash(const std::string& filename) {
-    print_hash(filename.c_str());
+void URLHash::print(const std::string& filename) {
+    print(filename.c_str());
 }

@@ -27,8 +27,8 @@ class URLHash {
         // unsigned operator[](std::string key); // Remember this isn't a reference
         const unsigned operator[](const char* key) const;
         const unsigned operator[](std::string key) const;
-        void print_hash(const char* filename);
-        void print_hash(const std::string& filename);
+        void print(const char* filename);
+        void print(const std::string& filename);
 };
 
 #endif
