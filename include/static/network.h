@@ -3,11 +3,13 @@
 
 #include "static/vector.h"
 #include "static/deque.h"
+#include "static/hash.h"
 #include <iostream>
 #include <limits>
 #include <fstream>
 #include <string> // idk if i should make my own string. Sounds annoying for other devs to initialize
 #include <stdexcept>
+#include <sstream>
 
 class SparseNetwork {
     private:
@@ -23,7 +25,7 @@ class SparseNetwork {
         // indices that refer to the neighbors within the same
         // community. This avoid code duplication 
         void read_bitstream(const std::string& filename); // This modifies n, m, num_communities, from_to, and out_degrees
-        void read_txt(const std::string& filename); // This modifies n, m, num_communities, from_to, and out_degrees
+        void read_txt(const std::string& filename, const URLHash& hash); // This modifies n, m, num_communities, from_to, and out_degrees
         void construct_with_from_to(bool responsible);
     public:
         unsigned n;
@@ -49,6 +51,8 @@ class SparseNetwork {
         SparseNetwork(const std::string& filename);
         // TODO: maybe add another constructor that passes in a
         // community assignment
+        SparseNetwork(const std::string& from_to_filename, 
+                      const std::string& hash_filename);
         SparseNetwork(const unsigned n, const unsigned m,
                       unsigned** from_to, unsigned* out_degrees);
         SparseNetwork(unsigned const n, unsigned const m,

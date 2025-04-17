@@ -24,6 +24,8 @@ class Louvain {
     public:
         Louvain();
         Louvain(const std::string& filename);
+        Louvain(const std::string& from_to_filename,
+                const std::string& hash_filename);
         Louvain(const unsigned n, const unsigned m,
                 unsigned** from_to, unsigned* out_degrees);
         Louvain(unsigned const n, const unsigned m,

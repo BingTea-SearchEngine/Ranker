@@ -8,6 +8,11 @@ SparseNetwork::SparseNetwork(const std::string& filename) {
     construct_with_from_to(true);
 }
 
+SparseNetwork::SparseNetwork(const std::string& from_to_filename,
+                             const std::string& hash_filename) {
+    //
+}
+
 SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
                              unsigned** from_to_in, unsigned* out_degrees_in)
   : n(n_in), m(m_in), num_communities(n_in), from_to(from_to_in), out_degrees(out_degrees_in) {
@@ -442,8 +447,49 @@ void SparseNetwork::read_bitstream(const std::string& filename) {
     }
 }
 
-void SparseNetwork::read_txt(const std::string& filename) {
+void SparseNetwork::read_txt(const std::string& filename, const URLHash& hash) {
+    unsigned** raw_rows = nullptr;
+    std::ifstream ifs(filename, std::ios::binary);
+    if (!ifs) {
+        // handle error
+        throw std::runtime_error("file does not exist, is empty, or is badly formatted");
+    }
+    
+    m = 0;
 
+    Vector<unsigned*> rows;
+    Vector<unsigned> degrees;
+    std::string line;
+    while (std::getline(ifs, line)) {
+        std::stringstream ss(line);
+        std::string url;
+        ss >> url;
+        unsigned current = hash[url];
+        Vector<unsigned> ids;
+        while (ss >> url) {
+            ids.push_back(hash[url]);
+        }
+        unsigned* row = new unsigned[ids.size()];
+        for (unsigned i = 0; i < ids.size(); ++i) {
+            row[i] = ids[i];
+        }
+        m += ids.size();
+        if (current >= rows.size()) {
+            rows.resize(current + 1);
+            degrees.resize(current + 1);
+        }
+        rows[current] = row;
+        degrees[current] = ids.size();
+    }
+    
+    n = rows.size();
+    num_communities = n;
+    from_to = new unsigned*[n];
+    out_degrees = new unsigned[n];
+    for (unsigned i = 0; i < n; ++i) {
+        from_to[i] = rows[i];
+        out_degrees[i] = degrees[i];
+    }
 }
 
 void SparseNetwork::dump_from_to(const std::string& filename) {
