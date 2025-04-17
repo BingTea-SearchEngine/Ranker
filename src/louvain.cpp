@@ -13,6 +13,18 @@ Louvain::Louvain(const std::string& filename)
     new_num_comm = -1;
 }
 
+Louvain::Louvain(const std::string& from_to_filename,
+                 const std::string& hash_filename)
+  : network(from_to_filename, hash_filename) {
+    original_n = network.n;
+    final_reverse_communities.resize(network.n);
+    final_reverse_communities.shrink_to_fit();
+    for (unsigned i = 0; i < network.n; ++i) {
+        final_reverse_communities[i] = i;
+    }
+    new_num_comm = -1;
+}
+
 Louvain::Louvain(const unsigned n_in, const unsigned m_in,
                  unsigned** from_to, unsigned* out_degrees)
   : original_n(n_in), network(n_in, m_in, from_to, out_degrees), 

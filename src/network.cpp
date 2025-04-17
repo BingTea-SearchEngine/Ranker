@@ -10,7 +10,9 @@ SparseNetwork::SparseNetwork(const std::string& filename) {
 
 SparseNetwork::SparseNetwork(const std::string& from_to_filename,
                              const std::string& hash_filename) {
-    //
+    URLHash hash(hash_filename);
+    read_txt(from_to_filename, hash);
+    construct_with_from_to(true);
 }
 
 SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
@@ -455,6 +457,7 @@ void SparseNetwork::read_txt(const std::string& filename, const URLHash& hash) {
         throw std::runtime_error("file does not exist, is empty, or is badly formatted");
     }
     
+    n = 0;
     m = 0;
 
     Vector<unsigned*> rows;
@@ -465,24 +468,27 @@ void SparseNetwork::read_txt(const std::string& filename, const URLHash& hash) {
         std::string url;
         ss >> url;
         unsigned current = hash[url];
+        n = max(n, current);
         Vector<unsigned> ids;
         while (ss >> url) {
-            ids.push_back(hash[url]);
+            unsigned id = hash[url];
+            ids.push_back(id);
+            n = max(n, id);
         }
         unsigned* row = new unsigned[ids.size()];
         for (unsigned i = 0; i < ids.size(); ++i) {
             row[i] = ids[i];
         }
         m += ids.size();
-        if (current >= rows.size()) {
-            rows.resize(current + 1);
-            degrees.resize(current + 1);
+        if (n >= rows.size()) {
+            rows.resize(n + 1, nullptr);
+            degrees.resize(n + 1, 0);
         }
         rows[current] = row;
         degrees[current] = ids.size();
     }
     
-    n = rows.size();
+    n++;
     num_communities = n;
     from_to = new unsigned*[n];
     out_degrees = new unsigned[n];
