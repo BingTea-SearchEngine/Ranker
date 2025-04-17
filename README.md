@@ -1,3 +1,28 @@
+Installation instructions
+```
+git clone https://github.com/BingTea-SearchEngine/Ranker.git
+cd Ranker
+git clone --recursive https://github.com/dmlc/xgboost
+```
+Setup CMake
+```
+mkdir build
+cd build
+cmake -S .. -B .
+make
+```
+
+Hash (THIS NEEDS TO BE DONE SEPARATELY TO LOUVAIN, THERES SOME WEIRD
+MEMORY MANAGEMENT IN CMPH. SOMETHING GETS DELETED PREMATURELY THAT
+CAUSES AN ERROR)
+```
+Vector<std::string> filenames;
+filenames.push_back("../data/config_urls.txt");
+URLHash hash(filenames);
+hash.dump("../data/config.hash");
+```
+
+
 Community detection with Louvain
 ```
 // Load network from file
