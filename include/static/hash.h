@@ -7,7 +7,8 @@
 #include <fstream>
 #include <iostream>
 #include <string.h>
-#include <vector>
+//#include <vector>
+// TODO: swap to custom Vector
 
 class URLHash {
     private:
@@ -22,7 +23,10 @@ class URLHash {
         URLHash(const std::string& filename);
         ~URLHash();
         void dump(const std::string& filename);
-        void test(const Vector<std::string>& filenames, const std::string& filename1);
+        // unsigned operator[](const char* key); // Remember this isn't a reference
+        // unsigned operator[](std::string key); // Remember this isn't a reference
+        const unsigned operator[](const char* key) const;
+        const unsigned operator[](std::string key) const;
 };
 
 #endif
