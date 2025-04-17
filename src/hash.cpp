@@ -98,3 +98,31 @@ const unsigned URLHash::operator[](std::string key) const {
     const char* c_key = key.c_str();
     return operator[](c_key);
 }
+
+void URLHash::print_hash(const char* filename) {
+    Vector<char*> urls;
+    std::ifstream ifs(filename);
+    if (!ifs) {
+        std::cerr << "Error opening file." << std::endl;
+        return;
+    }
+    
+    std::string url;
+    while (ifs >> url) {
+        urls.push_back(new char[url.length() + 1]);
+        strcpy(urls.back(), url.c_str());
+    }
+    
+    // Close the file
+    ifs.close();
+
+    for (unsigned i = 0; i < urls.size(); ++i) {
+        const char *key = urls[i];
+        unsigned int id = cmph_search(hash, key, (cmph_uint32)strlen(key));
+        std::cout << "key: " << key << " -- hash: " << id << '\n';
+    }
+}
+
+void URLHash::print_hash(const std::string& filename) {
+    print_hash(filename.c_str());
+}
