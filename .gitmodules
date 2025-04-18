@@ -1,3 +1,6 @@
 [submodule "xgboost"]
 	path = xgboost
 	url = https://github.com/dmlc/xgboost
+[submodule "cmph"]
+	path = cmph
+	url = https://github.com/zvelo/cmph.git
