@@ -5,7 +5,7 @@ project(Ranker)
 add_library(Ranker STATIC src/louvain.cpp src/network.cpp src/node.cpp 
 src/pagerank.cpp src/tree.cpp src/xgboost.cpp src/google.cpp src/hash.cpp)
 
-file(GLOB cmph_src "cmph-2.0/src/*.c" "cmph-2.0/src/*.h")
+file(GLOB cmph_src cmph/src/*)
 add_library(CMPH STATIC ${cmph_src})
 
 target_include_directories(Ranker PUBLIC ${PROJECT_SOURCE_DIR}/include)
