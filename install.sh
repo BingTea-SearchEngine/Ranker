@@ -1,6 +1,6 @@
 #!/bin/bash
 cd xgboost
-conda create --name ranker_xgb
+yes | conda create --name ranker_xgb
 conda activate ranker_xgb
 cmake -B build -S . -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
 cmake --build build --target install
