@@ -50,38 +50,58 @@ Louvain::Louvain(unsigned const n_in, const unsigned m_in,
 Louvain::~Louvain() {}
 
 void Louvain::phase1() {
+    bool verbose = true;
+    if (verbose)
+        std::cout << "Starting phase 1" << std::endl;
     bool repeat = false;
-    RNG rng(1);
-    unsigned* indices = new unsigned[network.n];
-    for (unsigned i = 0; i < network.n; ++i) {
-        indices[i] = i;
-    }
     
     double old_modularity = network.modularity();
     double new_modularity = network.modularity();
     do {
-        rng.shuffle(indices, network.n);
         old_modularity = new_modularity;
         // This groups nodes by community when , which is worse than 
         for (unsigned i = 0; i < network.n; ++i) {
-            unsigned community = network.reverse_communities[indices[i]];
+            std::cout << i << " / " << network.n << std::endl;
+            //std::cout << network.modularity() << std::endl;
+            Vector<unsigned> communities;
+            unsigned community = network.reverse_communities[i];
             unsigned node = network.remove_from_community(community);
-            double max_diff = -1;
-            unsigned new_community = -1;
-            for (unsigned j = 0; j < network.n; ++j) {
-                double diff = network.modularity_diff(node, j);
+            communities.push_back(community);
+            for (unsigned j = 0; j < network.out_degrees[node]; ++j) {
+                communities.push_back(network.reverse_communities[network.from_to[node][j]]);
+            }
+            for (unsigned j = 0; j < network.in_degrees[node]; ++j) {
+                communities.push_back(network.reverse_communities[network.to_from[node][j]]);
+            }
+            quicksort(communities.data(), 0, communities.size() - 1);
+            unsigned new_community = communities.front();
+            double max_diff = network.modularity_diff(node, new_community);
+            unsigned mod = communities.size() / 100 + 1;
+            std::cout << communities.size() << std::endl;
+            for (unsigned j = 1; j < communities.size(); ++j) {
+                if (communities[j - 1] == communities[j])
+                    continue;
+                if (communities[j] == -1)
+                    continue;
+                unsigned other_comm = communities[j];
+                double diff = network.modularity_diff(node, other_comm);
                 if (diff > max_diff) {
                     max_diff = diff;
-                    new_community = j;
+                    new_community = other_comm;
                 }
+                if (j % mod == 0)
+                    std::cout << (j / mod) << '%' << std::endl;
             }
             network.add_to_community(node, new_community);
+            if (network.communities[community].size() < network.communities[community].capacity() / 4) {
+                network.communities[community].shrink_to_fit();
+            }
         }
         new_modularity = network.modularity();
+        if (verbose)
+            std::cout << "Modularity: " << new_modularity << std::endl;
 
     } while (new_modularity > old_modularity);
- 
-    delete[] indices;
 
     for (unsigned i = 0; i < original_n; ++i) {
         final_reverse_communities[i] = network.reverse_communities[final_reverse_communities[i]];
@@ -89,8 +109,11 @@ void Louvain::phase1() {
 }
 
 void Louvain::phase2() {
+    bool verbose = true;
     reindex_communities();
     merge_communities();
+    if (verbose)
+        std::cout << "Num communities: " << new_num_comm << std::endl;
 }
 
 void Louvain::merge_communities() {
