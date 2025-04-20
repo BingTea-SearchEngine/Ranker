@@ -36,3 +36,5 @@ build/
 .vscode/
 
 data/credentials.txt
+
+data/links.txt
