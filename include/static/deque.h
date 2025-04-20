@@ -66,6 +66,17 @@ class Deque {
         }
 
         void shrink_to_fit() {
+            if (_size == 0) {
+                T* new_circle = new T[1](); // These aren't needed, they're just here to shut up valgrind
+
+                delete[] circle;
+                circle = new_circle;
+                _capacity = 1;
+                _front = 0;
+                _back = 0;
+                return;
+            }
+
             if (_size == _capacity)
                 return;
 
@@ -172,6 +183,35 @@ class Deque {
             }
             std::cout << std::endl;
         }
+
+        void resize(unsigned size_in) {
+            if (size_in == _size)
+                return;
+
+            if (size_in == 0) {
+                _size = 0;
+                _back = _front;
+                return;
+            }
+
+            if (size_in <= _capacity) {
+                _size = size_in;
+                _back = (_front + _size - 1) % _capacity;
+                return;
+            }
+
+            unsigned new_capacity = _capacity;
+            while (new_capacity < size_in)
+                new_capacity *= 2;
+            
+            reserve(new_capacity);
+            _size = size_in;
+        }
+
+        void clear() {
+            resize(0);
+        }
+
 };
 
 #endif
