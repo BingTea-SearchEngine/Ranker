@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <string.h>
+#include <limits>
 //#include <vector>
 // TODO: swap to custom Vector
 
@@ -18,9 +19,11 @@ class URLHash {
         unsigned nkeys;
     public:
         URLHash();
-        URLHash(const Vector<std::string>& filenames);
-        URLHash(const Vector<std::string>& filenames, unsigned num_pages);
-        URLHash(const std::string& filename);
+        URLHash(const std::string& filename, bool hashed);
+        //URLHash(const Vector<std::string>& filenames);
+        URLHash(const std::string& filename, unsigned num_pages);
+        //URLHash(const Vector<std::string>& filenames, unsigned num_pages);
+        //URLHash(const std::string& filename);
         ~URLHash();
         void dump(const std::string& filename);
         // unsigned operator[](const char* key); // Remember this isn't a reference
