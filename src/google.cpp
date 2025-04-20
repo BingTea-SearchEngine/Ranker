@@ -125,12 +125,25 @@ void GoogleMatrix::iteration(double damping) {
         page_ranks[i] = 0;
     }
 
+    double global_contribution = 0;
     for (unsigned i = 0; i < n; ++i) {
-        double contribution = original_page_ranks[i] / out_degrees[i];
-        for (unsigned j = 0; j < out_degrees[i]; ++j) {
-            unsigned node = from_to[i][j];
-            page_ranks[node] += contribution;
+        if (out_degrees[i] == n) {
+            global_contribution += original_page_ranks[i];
         }
+        else {
+            double contribution = original_page_ranks[i] / out_degrees[i];
+            for (unsigned j = 0; j < out_degrees[i]; ++j) {
+                unsigned node = from_to[i][j];
+                page_ranks[node] += contribution;
+            }
+        }
+        if (i % 1000000 == 0)
+            std::cout << i << std::endl;
+    }
+
+    global_contribution /= n;
+    for (unsigned i = 0; i < n; ++i) {
+        page_ranks[i] += global_contribution;
     }
 
     for (unsigned i = 0; i < n; ++i) {
@@ -140,8 +153,11 @@ void GoogleMatrix::iteration(double damping) {
 }
 
 Vector<double> GoogleMatrix::pagerank(double damping) {
-    for (unsigned i = 0; i < 75; ++i)
+    std::cout << "Starting" << std::endl;
+    for (unsigned i = 0; i < 75; ++i) {
         iteration(damping);
+        std::cout << i << std::endl;
+    }
     return page_ranks;
 }
 
