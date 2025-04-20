@@ -10,7 +10,7 @@ SparseNetwork::SparseNetwork(const std::string& filename) {
 
 SparseNetwork::SparseNetwork(const std::string& from_to_filename,
                              const std::string& hash_filename) {
-    URLHash hash(hash_filename);
+    URLHash hash(hash_filename, true);
     read_txt(from_to_filename, hash);
     construct_with_from_to(true);
 }
@@ -146,6 +146,7 @@ unsigned SparseNetwork::node_weight(unsigned node, bool out) {
     return in_weights[node];
 }
 
+// Get total edge weight to/from other nodes in the same community
 unsigned SparseNetwork::node_community_weight(unsigned node, bool out) {
     // TODO: test this
     unsigned* degrees;
@@ -250,6 +251,21 @@ void SparseNetwork::set_communities(unsigned* reverse_communities_in, bool delet
     }
 }
 
+/*
+m
+reverse_communities
+in_weights
+out_weights
+community_in_weights
+community_out_weights
+node_community_weight()
+    out_degrees
+    in_degrees
+    from_to
+    to_from
+    weights_from_to
+    weights_to_from
+*/
 double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
     reverse_communities[node] = community;
     unsigned weight = (node_community_weight(node, true) 
@@ -417,6 +433,7 @@ void SparseNetwork::read_bitstream(const std::string& filename) {
     
     m = 0;
 
+    unsigned current_row = 0;
     Vector<unsigned*> rows;
     Vector<unsigned> degrees;
     while (ifs.peek() != EOF) {
@@ -427,7 +444,8 @@ void SparseNetwork::read_bitstream(const std::string& filename) {
             if (value == -1) {
                 break;
             }
-            row.push_back(value);
+            if (value != current_row)
+                row.push_back(value);
             
         }
         m += row.size();
@@ -437,6 +455,7 @@ void SparseNetwork::read_bitstream(const std::string& filename) {
             raw_row[i] = row[i];
         }
         rows.push_back(raw_row);
+        current_row++;
     }
     
     n = rows.size();
