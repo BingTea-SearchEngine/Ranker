@@ -2,6 +2,7 @@
 #define VECTOR_H
 
 #include <stdexcept>
+#include <iostream>
 #include "static/algorithm.h"
 
 template <typename T> 
@@ -66,14 +67,8 @@ class Vector {
             if (size_in == _size)
                 return;
 
-            // Increase size, but don't reserve
+            // Change size, but don't reserve
             if (size_in <= _capacity) {
-                _size = size_in;
-                return;
-            }
-            
-            // Shrink (this comes after because it's less common)
-            if (size_in < _size) {
                 _size = size_in;
                 return;
             }
@@ -93,6 +88,10 @@ class Vector {
             for (unsigned i = old_size; i < _size; ++i) {
                 array[i] = value;
             }
+        }
+
+        void clear() {
+            resize(0);
         }
 
         void shrink_to_fit() {
@@ -154,19 +153,19 @@ class Vector {
         }
 
         T& front() {
-            return array[0];
+            return operator[](0);
         }
 
         const T& front() const {
-            return array[0];
+            return operator[](0);
         }
 
         T& back() {
-            return array[_size - 1];
+            return operator[](_size - 1);
         }
 
         const T& back() const {
-            return array[_size - 1];
+            return operator[](_size - 1);
         }
 
         T* data() {
@@ -176,6 +175,46 @@ class Vector {
         void sort() {
             quicksort(array, 0, _size - 1);
         }
+
+        void print() {
+            for (unsigned i = 0; i < _size; ++i)
+                std::cout << array[i] << ' ';
+            std::cout << std::endl;
+        }
+
+        bool empty() {
+            return _size == 0;
+        }
 };
 
 #endif
+
+/*
+        for (unsigned i = 0; i < network.n; ++i) {
+            std::cout << i << " / " << network.n << std::endl;
+            unsigned community = network.reverse_communities[indices[i]];
+            unsigned node = network.remove_from_community(community);
+            double max_diff = network.modularity_diff(node, community);
+            unsigned new_community = community;
+            for (unsigned j = 0; j < network.out_degrees[node]; ++j) {
+                unsigned other_comm = network.reverse_communities[network.from_to[node][j]];
+                double diff = network.modularity_diff(node, other_comm);
+                if (diff > max_diff) {
+                    max_diff = diff;
+                    new_community = other_comm;
+                }
+            }
+            for (unsigned j = 0; j < network.in_degrees[node]; ++j) {
+                unsigned other_comm = network.reverse_communities[network.to_from[node][j]];
+                double diff = network.modularity_diff(node, other_comm);
+                if (diff > max_diff) {
+                    max_diff = diff;
+                    new_community = other_comm;
+                }
+            }
+            network.add_to_community(node, new_community);
+            if (network.communities[community].size() < network.communities[community].capacity() / 4) {
+                network.communities[community].shrink_to_fit();
+            }
+        }
+*/
