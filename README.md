@@ -6,7 +6,7 @@ bash install.sh
 cd build
 ```
 
-Hash (THIS NEEDS TO BE DONE SEPARATELY TO LOUVAIN, THERES SOME WEIRD
+Create hash (THIS NEEDS TO BE DONE SEPARATELY TO LOUVAIN, THERES SOME WEIRD
 MEMORY MANAGEMENT IN CMPH. SOMETHING GETS DELETED PREMATURELY THAT
 CAUSES AN ERROR)
 ```
@@ -15,7 +15,12 @@ filenames.push_back("../data/config_urls.txt");
 URLHash hash(filenames);
 hash.dump("../data/config.hash");
 ```
-
+Read and use hash
+```
+URLHash hash("../data/links.hash", true);
+std::string url; // a C-string also works
+unsigned id = hash[url];
+```
 
 Community detection with Louvain
 ```
