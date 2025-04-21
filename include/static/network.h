@@ -28,24 +28,24 @@ class SparseNetwork {
         void read_txt(const std::string& filename, const URLHash& hash); // This modifies n, m, num_communities, from_to, and out_degrees
         void construct_with_from_to(bool responsible);
     public:
-        unsigned n;
-        unsigned m;
-        unsigned num_communities; 
+        static unsigned n;
+        static unsigned m;
+        static unsigned num_communities; 
         // This is separate from n since it may end up different when 
         // set_communities is called
         
-        unsigned** to_from;
-        unsigned** from_to;
-        unsigned** weights_to_from;
-        unsigned** weights_from_to;
-        unsigned* in_degrees;
-        unsigned* out_degrees;
-        unsigned* in_weights;
-        unsigned* out_weights;
-        Deque<unsigned>* communities;
-        unsigned* reverse_communities;
-        unsigned* community_in_weights;
-        unsigned* community_out_weights;
+        static unsigned** to_from;
+        static unsigned** from_to;
+        static unsigned** weights_to_from;
+        static unsigned** weights_from_to;
+        static unsigned* in_degrees;
+        static unsigned* out_degrees;
+        static unsigned* in_weights;
+        static unsigned* out_weights;
+        static Deque<unsigned>* communities;
+        static unsigned* reverse_communities;
+        static unsigned* community_in_weights;
+        static unsigned* community_out_weights;
 
         SparseNetwork();
         SparseNetwork(const std::string& filename);
@@ -61,16 +61,19 @@ class SparseNetwork {
         int has_edge(unsigned node1, unsigned node2);
         double modularity();
         bool same_community(unsigned node1, unsigned node2);
+        static bool static_same_community(unsigned node1, unsigned node2);
         unsigned* get_successors(unsigned node);
         unsigned* get_predecessors(unsigned node);
         unsigned degree(unsigned node, bool out);
         unsigned node_weight(unsigned node, bool out);
         unsigned node_community_weight(unsigned node, bool out);
+        static unsigned static_node_community_weight(unsigned node, unsigned community, bool out);
         void add_to_community(unsigned node, unsigned community);
         unsigned remove_from_community(unsigned community);
         double community_modularity(unsigned community);
         void set_communities(unsigned* reverse_communities, bool delete_communities);
         double modularity_diff(unsigned node, unsigned community);
+        static double static_modularity_diff(unsigned node, unsigned community);
         void fully_responsible();
         void delete_responsible();
         void print(bool adjacency);

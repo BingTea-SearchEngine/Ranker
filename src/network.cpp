@@ -16,14 +16,20 @@ SparseNetwork::SparseNetwork(const std::string& from_to_filename,
 }
 
 SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in,
-                             unsigned** from_to_in, unsigned* out_degrees_in)
-  : n(n_in), m(m_in), num_communities(n_in), from_to(from_to_in), out_degrees(out_degrees_in) {
+                             unsigned** from_to_in, unsigned* out_degrees_in) {
+    n = n_in;
+    m = m_in;
+    num_communities = n_in;
+    from_to = from_to_in;
+    out_degrees = out_degrees_in;
     construct_with_from_to(false);
 }
 
 SparseNetwork::SparseNetwork(unsigned const n_in, unsigned const m_in, 
-                             unsigned* first_in, unsigned* second_in)
-  : n(n_in), m(m_in), num_communities(n_in) {
+                             unsigned* first_in, unsigned* second_in) {
+    n = n_in;
+    m = m_in;
+    num_communities = n_in;
     // Deep copy edge lists
     // Maybe shallow but these will get modified. Make sure these aren't
     // needed later
@@ -174,6 +180,36 @@ unsigned SparseNetwork::node_community_weight(unsigned node, bool out) {
     return total;
 }
 
+bool SparseNetwork::static_same_community(unsigned node1, unsigned node2) {
+    return reverse_communities[node1] == reverse_communities[node2];
+}
+
+unsigned SparseNetwork::static_node_community_weight(unsigned node, unsigned community, bool out) {
+    unsigned* degrees;
+    unsigned** neighbors;
+    unsigned** weights;
+    if (out) {
+        degrees = out_degrees;
+        neighbors = from_to;
+        weights = weights_from_to;
+    }
+    else {
+        degrees = in_degrees;
+        neighbors = to_from;
+        weights = weights_to_from;
+    }
+    
+    unsigned total = 0;
+    for (unsigned i = 0; i < degrees[node]; ++i) {
+        unsigned other = neighbors[node][i];
+        if (reverse_communities[other] == community) {
+            total += weights[node][i];
+        }
+    }
+
+    return total;
+}
+
 void SparseNetwork::add_to_community(unsigned node, unsigned community) {
     // I'm lazy and can't be bothered to think of an actually good
     // solution. Assume that the given node doesn't already belong in a
@@ -270,6 +306,16 @@ double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
     reverse_communities[node] = community;
     unsigned weight = (node_community_weight(node, true) 
                        + node_community_weight(node, false));
+    double expected = double(out_weights[node] * community_in_weights[community]
+                             + in_weights[node] * community_out_weights[community]) / m;
+    
+    return (weight - expected) / m;
+}
+
+// TODO: DON'T MULTITHREAD THIS IT'S SLOWER
+double SparseNetwork::static_modularity_diff(unsigned node, unsigned community) {
+    unsigned weight = static_node_community_weight(node, community, true) +
+                      static_node_community_weight(node, community, false);
     double expected = double(out_weights[node] * community_in_weights[community]
                              + in_weights[node] * community_out_weights[community]) / m;
     

@@ -1,5 +1,21 @@
 #include "static/louvain.h"
 
+unsigned SparseNetwork::n;
+unsigned SparseNetwork::m;
+unsigned SparseNetwork::num_communities; 
+unsigned** SparseNetwork::to_from;
+unsigned** SparseNetwork::from_to;
+unsigned** SparseNetwork::weights_to_from;
+unsigned** SparseNetwork::weights_from_to;
+unsigned* SparseNetwork::in_degrees;
+unsigned* SparseNetwork::out_degrees;
+unsigned* SparseNetwork::in_weights;
+unsigned* SparseNetwork::out_weights;
+Deque<unsigned>* SparseNetwork::communities;
+unsigned* SparseNetwork::reverse_communities;
+unsigned* SparseNetwork::community_in_weights;
+unsigned* SparseNetwork::community_out_weights;
+
 Louvain::Louvain() {}
 
 Louvain::Louvain(const std::string& filename)
@@ -49,6 +65,37 @@ Louvain::Louvain(unsigned const n_in, const unsigned m_in,
 
 Louvain::~Louvain() {}
 
+void phase1_helper(unsigned* new_community, double* max_diff,
+                   unsigned node, Vector<unsigned>* communities,
+                   SparseNetwork* network, unsigned start, unsigned end, unsigned idx) {
+    *new_community = (*communities)[start++];
+    if (*new_community == -1) {
+        *max_diff = -1;
+        return;
+    }
+    unsigned mod = (end - start) / 100 + 1;
+    unsigned start_original = start;
+    *max_diff = network->static_modularity_diff(node, *new_community);
+    for (; start < end; ++start) {
+        if ((*communities)[start - 1] == (*communities)[start])
+            continue;
+        if ((*communities)[start] == -1)
+            continue;
+
+        unsigned other_comm = (*communities)[start];
+        double diff = network->static_modularity_diff(node, other_comm);
+        if (diff > *max_diff) {
+            *max_diff = diff;
+            *new_community = other_comm;
+        }
+        if (start % mod == 0) {
+            for (unsigned i = 0; i < idx; ++i)
+                std::cout << "    ";
+            std::cout << ((start - start_original) / mod) << '%' << std::endl;
+        }
+    }
+}
+
 void Louvain::phase1() {
     bool verbose = true;
     if (verbose)
@@ -74,23 +121,64 @@ void Louvain::phase1() {
                 communities.push_back(network.reverse_communities[network.to_from[node][j]]);
             }
             quicksort(communities.data(), 0, communities.size() - 1);
-            unsigned new_community = communities.front();
-            double max_diff = network.modularity_diff(node, new_community);
-            unsigned mod = communities.size() / 100 + 1;
+            unsigned new_community = -1;
             std::cout << communities.size() << std::endl;
-            for (unsigned j = 1; j < communities.size(); ++j) {
-                if (communities[j - 1] == communities[j])
-                    continue;
-                if (communities[j] == -1)
-                    continue;
-                unsigned other_comm = communities[j];
-                double diff = network.modularity_diff(node, other_comm);
-                if (diff > max_diff) {
-                    max_diff = diff;
-                    new_community = other_comm;
+            if (communities.size() >= 50000) {
+                unsigned base = communities.size() / 8;
+                unsigned new_communities[8];
+                double max_diffs[8];
+                unsigned starts[8]{0, base, 2 * base, 3 * base, 4 * base, 5 * base, 6 * base, 7 * base};
+                unsigned ends[8]{base, 2 * base, 3 * base, 4 * base, 5 * base, 6 * base, 7 * base, communities.size()};
+                std::thread t0(phase1_helper, new_communities, max_diffs, 
+                               node, &communities, &network, starts[0], ends[0], 0);
+                std::thread t1(phase1_helper, new_communities + 1, max_diffs + 1, 
+                               node, &communities, &network, starts[1], ends[1], 1);
+                std::thread t2(phase1_helper, new_communities + 2, max_diffs + 2, 
+                               node, &communities, &network, starts[2], ends[2], 2);
+                std::thread t3(phase1_helper, new_communities + 3, max_diffs + 3, 
+                               node, &communities, &network, starts[3], ends[3], 3);
+                std::thread t4(phase1_helper, new_communities + 4, max_diffs + 4, 
+                               node, &communities, &network, starts[4], ends[4], 4);
+                std::thread t5(phase1_helper, new_communities + 5, max_diffs + 5, 
+                               node, &communities, &network, starts[5], ends[5], 5);
+                std::thread t6(phase1_helper, new_communities + 6, max_diffs + 6, 
+                               node, &communities, &network, starts[6], ends[6], 6);
+                std::thread t7(phase1_helper, new_communities + 7, max_diffs + 7, 
+                               node, &communities, &network, starts[7], ends[7], 7);
+                t0.join();
+                t1.join();
+                t2.join();
+                t3.join();
+                t4.join();
+                t5.join();
+                t6.join();
+                t7.join();
+                double max_diff = -1;
+                for (unsigned j = 0; j < 8; ++j) {
+                    if (max_diffs[j] > max_diff) {
+                        max_diff = max_diffs[j];
+                        new_community = new_communities[j];
+                    }
                 }
-                if (j % mod == 0)
-                    std::cout << (j / mod) << '%' << std::endl;
+            }
+            else {
+                new_community = communities.front();
+                double max_diff = network.static_modularity_diff(node, new_community);
+                unsigned mod = communities.size() / 100 + 1;
+                for (unsigned j = 1; j < communities.size(); ++j) {
+                    if (communities[j - 1] == communities[j])
+                        continue;
+                    if (communities[j] == -1)
+                        continue;
+                    unsigned other_comm = communities[j];
+                    double diff =  network.static_modularity_diff(node, other_comm);
+                    if (diff > max_diff) {
+                        max_diff = diff;
+                        new_community = other_comm;
+                    }
+                    if (j % mod == 0)
+                        std::cout << (j / mod) << '%' << std::endl;
+                }
             }
             network.add_to_community(node, new_community);
             if (network.communities[community].size() < network.communities[community].capacity() / 4) {

@@ -5,6 +5,7 @@
 #include "static/vector.h"
 #include "static/algorithm.h"
 #include <string>
+#include <thread>
 
 class Louvain {
     private:
