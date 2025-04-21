@@ -1,0 +1,49 @@
+For the intermediate rankers, they are a binary classifier of "relevant"
+or "not relevant". For the data on each query, supply some "not
+relevant" data as well (data that wasn't returned by Google). Also
+purposefully give it less "not relevant" data, that way the model isn't
+punished as much for false positives, but more heavily on false
+negatives. For example:
+
+10 relevant
+5 nonrelevant
+
+Train:
+8 relevant
+4 nonrelevant
+
+Test:
+2 relevant
+1 nonrelevant
+
+Static:
+URL length
+DOC length
+domain
+PageRank
+CheiRank
+DomainRank (maybe)
+
+Dynamic:
+Short spans
+In order spans
+Exact phrases
+Average word counts
+Average word percent
+
+valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         --track-origins=yes \
+         --verbose \
+         --log-file=valgrind-out.txt \
+         ./Runner
+
+valgrind --tool=massif ./Runner
+
+ms_print massif.out.12345
+
+cmake -DCMAKE_BUILD_TYPE=Debug -B . -S ..
+
+CURRENTLY, SELF-LOOPS ARE PRESENT IN THE SAVED FROM-TO AND TO-FROM
+FILES, BUT THEY ARE OMMITTED IN READ_BITSTREAM! IF YOU DON'T INITIALIZE
+WITH READ_BITSTREAM, THEN SELF-LOOPS WILL BE PRESENT
