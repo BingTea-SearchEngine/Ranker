@@ -212,6 +212,9 @@ class Deque {
             resize(0);
         }
 
+        bool empty() {
+            return _size == 0;
+        }
 };
 
 #endif
