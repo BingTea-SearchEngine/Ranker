@@ -116,6 +116,10 @@ int SparseNetwork::has_edge(unsigned node1, unsigned node2) {
     return binary_search(from_to[node1], node2, out_degrees[node1]);
 }
 
+int SparseNetwork::static_has_edge(unsigned node1, unsigned node2) {
+    return binary_search(from_to[node1], node2, out_degrees[node1]);
+}
+
 bool SparseNetwork::same_community(unsigned node1, unsigned node2) {
     return reverse_communities[node1] == reverse_communities[node2];
 }
@@ -123,9 +127,61 @@ bool SparseNetwork::same_community(unsigned node1, unsigned node2) {
 double SparseNetwork::modularity() {
     // TODO: this is easily multithreadable
 
+    ///*
+    double total = 0;
+    double totals[8]{0, 0, 0, 0, 0, 0, 0, 0};
+    unsigned base = num_communities / 8;
+    std::thread t0(modularity_helper, totals, 0, base, 0);
+    std::thread t1(modularity_helper, totals + 1, base, 2 * base, 1);
+    std::thread t2(modularity_helper, totals + 2, 2 * base, 3 * base, 2);
+    std::thread t3(modularity_helper, totals + 3, 3 * base, 4 * base, 3);
+    std::thread t4(modularity_helper, totals + 4, 4 * base, 5 * base, 4);
+    std::thread t5(modularity_helper, totals + 5, 5 * base, 6 * base, 5);
+    std::thread t6(modularity_helper, totals + 6, 6 * base, 7 * base, 6);
+    std::thread t7(modularity_helper, totals + 7, 7 * base, num_communities, 7);
+    t0.join();
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
+    t5.join();
+    t6.join();
+    t7.join();
+    for (unsigned i = 0; i < 8; ++i) {
+        total += totals[i];
+    }
+    return total;
+    //*/
+    /*
     double total = 0;
     for (unsigned community = 0; community < num_communities; ++community)
         total += community_modularity(community);
+
+    return total;
+    */
+}
+
+void SparseNetwork::modularity_helper(double* output, unsigned start, unsigned end, unsigned idx) {
+    double total = 0;
+    unsigned mod = (end - start) / 100 + 1;
+    for (unsigned community = start; community < end; ++community) {
+        total += static_community_modularity(community);
+        //if (community % mod == 0) {
+        //    for (unsigned i = 0; i < idx; ++i)
+        //        std::cout << "    ";
+        //    std::cout << ((community - start) / mod) << '%' << std::endl;
+        //}
+    }
+    *output = total;
+}
+
+double SparseNetwork::static_modularity() {
+    // TODO: this is easily multithreadable
+
+    double total = 0;
+
+    for (unsigned community = 0; community < num_communities; ++community)
+        total += static_community_modularity(community);
 
     return total;
 }
@@ -241,11 +297,30 @@ double SparseNetwork::community_modularity(unsigned community) {
     auto& target_comm = communities[community];
     double total = 0;
     for (unsigned i = 0; i < target_comm.size(); ++i) {
+        unsigned node1 = target_comm[i];
         for (unsigned j = 0; j < target_comm.size(); ++j) {
-            unsigned node1 = target_comm[i];
             unsigned node2 = target_comm[j];
 
             int index = has_edge(node1, node2);
+            if (index != -1) {
+                total += weights_from_to[node1][index];
+            }
+
+            total -= double(out_weights[node1] * in_weights[node2]) / m;
+        }
+    }
+    return total / m;
+}
+
+double SparseNetwork::static_community_modularity(unsigned community) {
+    auto& target_comm = communities[community];
+    double total = 0;
+    for (unsigned i = 0; i < target_comm.size(); ++i) {
+        unsigned node1 = target_comm[i];
+        for (unsigned j = 0; j < target_comm.size(); ++j) {
+            unsigned node2 = target_comm[j];
+
+            int index = static_has_edge(node1, node2);
             if (index != -1) {
                 total += weights_from_to[node1][index];
             }
@@ -277,14 +352,21 @@ void SparseNetwork::set_communities(unsigned* reverse_communities_in, bool delet
     for (unsigned i = 0; i < num_communities; ++i) {
         community_in_weights[i] = 0;
         community_out_weights[i] = 0;
+        auto temp_comm = communities[i];
+        communities[i].clear();
     }
 
     for (unsigned i = 0; i < n; ++i) {
         unsigned community = reverse_communities_in[i];
+        std::cout << i << " -> " << community << std::endl;
         communities[community].push_back(i);
         community_in_weights[community] += in_weights[i];
         community_out_weights[community] += out_weights[i];
     }
+
+    //for (unsigned i = 0; i < num_communities; ++i) {
+    //    std::cout << "comm: " << i << " size: " << communities[i].size() << std::endl;
+    //}
 }
 
 /*
@@ -313,14 +395,62 @@ double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
 }
 
 // TODO: DON'T MULTITHREAD THIS IT'S SLOWER
-double SparseNetwork::static_modularity_diff(unsigned node, unsigned community) {
+double SparseNetwork::static_modularity_diff(unsigned node, unsigned community, double resolution) {
     unsigned weight = static_node_community_weight(node, community, true) +
                       static_node_community_weight(node, community, false);
     double expected = double(out_weights[node] * community_in_weights[community]
                              + in_weights[node] * community_out_weights[community]) / m;
     
+    return (weight - resolution * expected) / m;
+}
+
+double SparseNetwork::test(unsigned node, unsigned community) {
+    unsigned weight = 0;
+    for (unsigned i = 0; i < out_degrees[node]; ++i) {
+        unsigned other = from_to[node][i];
+        if (reverse_communities[other] == community) {
+            weight += weights_from_to[node][i];
+        }
+    }
+
+    for (unsigned i = 0; i < in_degrees[node]; ++i) {
+        unsigned other = to_from[node][i];
+        if (reverse_communities[other] == community) {
+            weight += weights_to_from[node][i];
+        }
+    }
+
+    double expected = double(out_weights[node] * community_in_weights[community]
+                             + in_weights[node] * community_out_weights[community]) / m;
+    
     return (weight - expected) / m;
 }
+
+/*
+unsigned* degrees;
+    unsigned** neighbors;
+    unsigned** weights;
+    if (out) {
+        degrees = out_degrees;
+        neighbors = from_to;
+        weights = weights_from_to;
+    }
+    else {
+        degrees = in_degrees;
+        neighbors = to_from;
+        weights = weights_to_from;
+    }
+    
+    unsigned total = 0;
+    for (unsigned i = 0; i < degrees[node]; ++i) {
+        unsigned other = neighbors[node][i];
+        if (reverse_communities[other] == community) {
+            total += weights[node][i];
+        }
+    }
+
+    return total;
+*/
 
 void SparseNetwork::fully_responsible() {
     delete_from_to = true;

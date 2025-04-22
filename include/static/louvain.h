@@ -17,7 +17,7 @@ class Louvain {
         Vector<unsigned> final_reverse_communities;
         unsigned* map = nullptr;
         unsigned new_num_comm;
-        void phase1();
+        void phase1(double resolution);
         void phase2();
         void merge_communities();
         void reindex_communities();
@@ -32,7 +32,7 @@ class Louvain {
         Louvain(unsigned const n, const unsigned m,
                 unsigned* first, unsigned* second);
         ~Louvain();
-        void partition();
+        void partition(double resolution);
         void set_communities(unsigned* reverse_communities);
         void set_communities(const std::string& filename);
         const Vector<Vector<unsigned>>& get_communities() const;

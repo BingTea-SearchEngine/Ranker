@@ -10,11 +10,13 @@
 #include <string> // idk if i should make my own string. Sounds annoying for other devs to initialize
 #include <stdexcept>
 #include <sstream>
+#include <thread>
 
 class SparseNetwork {
     private:
         bool delete_from_to = true;
         bool delete_communities = true;
+        static void modularity_helper(double* output, unsigned start, unsigned end, unsigned idx);
         
         // Maybe move communities and its related functions to
         // Louvain. This might require more getter functions or making
@@ -59,7 +61,9 @@ class SparseNetwork {
                       unsigned* first, unsigned* second);
         ~SparseNetwork();
         int has_edge(unsigned node1, unsigned node2);
+        static int static_has_edge(unsigned node1, unsigned node2);
         double modularity();
+        static double static_modularity();
         bool same_community(unsigned node1, unsigned node2);
         static bool static_same_community(unsigned node1, unsigned node2);
         unsigned* get_successors(unsigned node);
@@ -71,14 +75,16 @@ class SparseNetwork {
         void add_to_community(unsigned node, unsigned community);
         unsigned remove_from_community(unsigned community);
         double community_modularity(unsigned community);
+        static double static_community_modularity(unsigned community);
         void set_communities(unsigned* reverse_communities, bool delete_communities);
         double modularity_diff(unsigned node, unsigned community);
-        static double static_modularity_diff(unsigned node, unsigned community);
+        static double static_modularity_diff(unsigned node, unsigned community, double resolution);
         void fully_responsible();
         void delete_responsible();
         void print(bool adjacency);
         void dump_from_to(const std::string& filename);
         void dump_to_from(const std::string& filename);
+        static double test(unsigned node, unsigned community);
 };
     
 #endif
