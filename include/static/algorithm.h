@@ -30,7 +30,7 @@ void quicksort(T* values, int left, int right) {
     if (left >= right)
         return;
 
-    unsigned pivot = values[(left + right) / 2];
+    T pivot = values[(left + right) / 2];
 
     int i = left;
     int j = right;
@@ -41,7 +41,7 @@ void quicksort(T* values, int left, int right) {
         while (pivot < values[j])
             j--;
         if (i <= j) {
-            unsigned temp = values[i];
+            T temp = values[i];
             values[i] = values[j];
             values[j] = temp;
             i++;
@@ -52,6 +52,40 @@ void quicksort(T* values, int left, int right) {
         quicksort(values, left, j);
     if (i < right)
         quicksort(values, i, right);
+}
+
+template <typename T, typename U>
+void argsort(T* indices, U* values, int left, int right) {
+    if (left >= right)
+        return;
+
+    // pick pivot as the value at the middle index
+    U pivot = values[indices[(left + right) / 2]];
+
+    int i = left;
+    int j = right;
+
+    // partition based on values[indices[*]]
+    while (i <= j) {
+        while (values[indices[i]] < pivot)
+            i++;
+        while (pivot < values[indices[j]])
+            j--;
+        if (i <= j) {
+            // swap only the indices
+            T tmp = indices[i];
+            indices[i] = indices[j];
+            indices[j] = tmp;
+            i++;
+            j--;
+        }
+    }
+
+    // recurse on sub‑ranges
+    if (left < j)
+        argsort(indices, values, left, j);
+    if (i < right)
+        argsort(indices, values, i, right);
 }
 
 template <typename T>
@@ -72,8 +106,8 @@ void quicksort_pair(T* first, T* second,
     if (left >= right || left < 0)
         return;
 
-    unsigned pivot_first = first[(left + right) / 2];
-    unsigned pivot_second = second[(left + right) / 2];
+    T pivot_first = first[(left + right) / 2];
+    T pivot_second = second[(left + right) / 2];
 
     int i = left;
     int j = right;
@@ -84,7 +118,7 @@ void quicksort_pair(T* first, T* second,
         while (lt_pair(pivot_first, pivot_second, first[j], second[j]))
             j--;
         if (i <= j) {
-            unsigned temp = first[i];
+            T temp = first[i];
             first[i] = first[j];
             first[j] = temp;
             temp = second[i];
@@ -171,12 +205,12 @@ inline void dump_2D(unsigned** array, unsigned num_rows, unsigned* sizes, const 
 }
 
 template <typename T>
-const T& max(T& first, T& second) {
+const T& max(const T& first, const T& second) {
     return (first < second) ? second: first;
 }
 
 template <typename T>
-const T& min(T& first, T& second) {
+const T& min(const T& first, const T& second) {
     return (first < second) ? first: second;
 }
 
