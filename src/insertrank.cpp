@@ -95,7 +95,6 @@ int main(int argc, char**argv) {
         }
 
         unsigned row = hash[url];
-        cout << "Url: " << url << "Row: " << row << endl;
         bool hasPrank = content.find("<prank>") != std::string::npos;
         bool hasCrank = content.find("<crank>") != std::string::npos;
         bool hasCommunity = content.find("<community>") != std::string::npos;
