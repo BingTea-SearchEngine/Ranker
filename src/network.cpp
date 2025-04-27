@@ -125,9 +125,6 @@ bool SparseNetwork::same_community(unsigned node1, unsigned node2) {
 }
 
 double SparseNetwork::modularity() {
-    // TODO: this is easily multithreadable
-
-    ///*
     double total = 0;
     double totals[8]{0, 0, 0, 0, 0, 0, 0, 0};
     unsigned base = num_communities / 8;
@@ -151,14 +148,6 @@ double SparseNetwork::modularity() {
         total += totals[i];
     }
     return total;
-    //*/
-    /*
-    double total = 0;
-    for (unsigned community = 0; community < num_communities; ++community)
-        total += community_modularity(community);
-
-    return total;
-    */
 }
 
 void SparseNetwork::modularity_helper(double* output, unsigned start, unsigned end, unsigned idx) {
@@ -166,18 +155,11 @@ void SparseNetwork::modularity_helper(double* output, unsigned start, unsigned e
     unsigned mod = (end - start) / 100 + 1;
     for (unsigned community = start; community < end; ++community) {
         total += static_community_modularity(community);
-        //if (community % mod == 0) {
-        //    for (unsigned i = 0; i < idx; ++i)
-        //        std::cout << "    ";
-        //    std::cout << ((community - start) / mod) << '%' << std::endl;
-        //}
     }
     *output = total;
 }
 
 double SparseNetwork::static_modularity() {
-    // TODO: this is easily multithreadable
-
     double total = 0;
 
     for (unsigned community = 0; community < num_communities; ++community)
@@ -208,9 +190,7 @@ unsigned SparseNetwork::node_weight(unsigned node, bool out) {
     return in_weights[node];
 }
 
-// Get total edge weight to/from other nodes in the same community
 unsigned SparseNetwork::node_community_weight(unsigned node, bool out) {
-    // TODO: test this
     unsigned* degrees;
     unsigned** neighbors;
     unsigned** weights;
@@ -277,8 +257,6 @@ void SparseNetwork::add_to_community(unsigned node, unsigned community) {
     community_out_weights[community] += out_weights[node];
 
     reverse_communities[node] = community;
-    // Remove from old community
-    // Add to new community
 }
 
 unsigned SparseNetwork::remove_from_community(unsigned community) {
@@ -363,27 +341,7 @@ void SparseNetwork::set_communities(unsigned* reverse_communities_in, bool delet
         community_in_weights[community] += in_weights[i];
         community_out_weights[community] += out_weights[i];
     }
-
-    //for (unsigned i = 0; i < num_communities; ++i) {
-    //    std::cout << "comm: " << i << " size: " << communities[i].size() << std::endl;
-    //}
 }
-
-/*
-m
-reverse_communities
-in_weights
-out_weights
-community_in_weights
-community_out_weights
-node_community_weight()
-    out_degrees
-    in_degrees
-    from_to
-    to_from
-    weights_from_to
-    weights_to_from
-*/
 double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
     reverse_communities[node] = community;
     unsigned weight = (node_community_weight(node, true) 
@@ -394,7 +352,6 @@ double SparseNetwork::modularity_diff(unsigned node, unsigned community) {
     return (weight - expected) / m;
 }
 
-// TODO: DON'T MULTITHREAD THIS IT'S SLOWER
 double SparseNetwork::static_modularity_diff(unsigned node, unsigned community, double resolution) {
     unsigned weight = static_node_community_weight(node, community, true) +
                       static_node_community_weight(node, community, false);
@@ -404,77 +361,29 @@ double SparseNetwork::static_modularity_diff(unsigned node, unsigned community, 
     return (weight - resolution * expected) / m;
 }
 
-double SparseNetwork::test(unsigned node, unsigned community) {
-    unsigned weight = 0;
-    for (unsigned i = 0; i < out_degrees[node]; ++i) {
-        unsigned other = from_to[node][i];
-        if (reverse_communities[other] == community) {
-            weight += weights_from_to[node][i];
-        }
-    }
-
-    for (unsigned i = 0; i < in_degrees[node]; ++i) {
-        unsigned other = to_from[node][i];
-        if (reverse_communities[other] == community) {
-            weight += weights_to_from[node][i];
-        }
-    }
-
-    double expected = double(out_weights[node] * community_in_weights[community]
-                             + in_weights[node] * community_out_weights[community]) / m;
-    
-    return (weight - expected) / m;
-}
-
-/*
-unsigned* degrees;
-    unsigned** neighbors;
-    unsigned** weights;
-    if (out) {
-        degrees = out_degrees;
-        neighbors = from_to;
-        weights = weights_from_to;
-    }
-    else {
-        degrees = in_degrees;
-        neighbors = to_from;
-        weights = weights_to_from;
-    }
-    
-    unsigned total = 0;
-    for (unsigned i = 0; i < degrees[node]; ++i) {
-        unsigned other = neighbors[node][i];
-        if (reverse_communities[other] == community) {
-            total += weights[node][i];
-        }
-    }
-
-    return total;
-*/
-
 void SparseNetwork::fully_responsible() {
     delete_from_to = true;
     delete_communities = true;
 }
 
 void SparseNetwork::delete_responsible() {
-    // TODO: I haven't tested for edge cases
+    if (delete_from_to) {
+        for (unsigned i = 0; i < n; ++i)
+            delete[] from_to[i];
+        delete[] from_to;
+        delete[] out_degrees; 
+    }
+
     for (unsigned i = 0; i < n; ++i) {
         delete[] to_from[i];
-        if (delete_from_to)
-            delete[] from_to[i];
         delete[] weights_to_from[i];
         delete[] weights_from_to[i];
     }
 
     delete[] to_from;
-    if (delete_from_to)
-        delete[] from_to;
     delete[] weights_to_from;
     delete[] weights_from_to;
     delete[] in_degrees;
-    if (delete_from_to)
-        delete[] out_degrees;
     delete[] community_in_weights;
     delete[] community_out_weights;
     delete[] in_weights;
@@ -707,7 +616,6 @@ void SparseNetwork::construct_with_from_to(bool responsible) {
     to_from = new unsigned*[n];
     weights_to_from = new unsigned*[n];
     weights_from_to = new unsigned*[n];
-    // Store degrees in arrays. If these are sparse, use a map instead.
     in_degrees = new unsigned[n];
     in_weights = new unsigned[n];
     out_weights = new unsigned[n];
@@ -741,7 +649,6 @@ void SparseNetwork::construct_with_from_to(bool responsible) {
         community_in_weights[i] = in_degrees[i];
         community_out_weights[i] = out_degrees[i];
         
-        // Maybe assign 0 length arrays to_from nullptr
         to_from[i] = new unsigned[in_degrees[i]];
         weights_to_from[i] = new unsigned[in_degrees[i]];
         weights_from_to[i] = new unsigned[out_degrees[i]];
@@ -762,13 +669,7 @@ void SparseNetwork::construct_with_from_to(bool responsible) {
     }
 
     for (unsigned i = 0; i < n; ++i) {
-        // This is multithreadable. No overlapping memory accesses.
         quicksort(to_from[i], 0, in_degrees[i] - 1);
         quicksort(from_to[i], 0, out_degrees[i] - 1);
-        //quicksort_pair(to_from[i], weights_to_from[i], 0, in_degrees[i] - 1);
-        //quicksort_pair(from_to[i], weights_from_to[i], 0, out_degrees[i] - 1);
-        //Technically these should be sorted like twins, but weights are
-        //always initialized to 1, so there's no difference. But I feel
-        //like this should still be here.
     }
 }

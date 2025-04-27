@@ -84,7 +84,6 @@ class SparseNetwork {
         void print(bool adjacency);
         void dump_from_to(const std::string& filename);
         void dump_to_from(const std::string& filename);
-        static double test(unsigned node, unsigned community);
 };
     
 #endif
