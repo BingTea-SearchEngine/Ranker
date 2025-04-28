@@ -76,6 +76,7 @@ int main() {
     safe_xgboost(XGBoosterPredictFromDMatrix(booster, dmat, config, &out_shape, &out_dim, &predictions));
 
     // DO SOMETHING WITH predicitions
+    const unsigned N = 10;
     std::vector<unsigned> indices;
     for (unsigned i = 0; i < num_rows; ++i) {
         indices.push_back(i);
@@ -84,14 +85,14 @@ int main() {
     auto comp = [predictions](size_t first, size_t second) {
         return predictions[first] > predictions[second];
     };
-    std::partial_sort(indices.begin(), indices.begin() + 10,
+    std::partial_sort(indices.begin(), indices.begin() + N,
                       indices.end(), comp);
-    std::sort(indices.begin(), indices.begin() + 10, comp);
-    indices.resize(10);
-    std::vector<float> top10;
-    for (unsigned i = 0; i < 10; ++i) {
-        top10.push_back(predictions[indices[i]]);
-        std::cout << top10.back() << std::endl;
+    std::sort(indices.begin(), indices.begin() + N, comp);
+    indices.resize(N);
+    std::vector<float> topN;
+    for (unsigned i = 0; i < N; ++i) {
+        topN.push_back(predictions[indices[i]]);
+        std::cout << topN.back() << std::endl;
     }
 
     safe_xgboost(XGDMatrixFree(dmat));
