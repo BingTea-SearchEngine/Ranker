@@ -7,6 +7,7 @@
 #include <sstream>
 #include <fstream>
 #include <xgboost/c_api.h>
+#include <algorithm>
 
 #define safe_xgboost(call) {  \
     int err = (call); \
@@ -75,6 +76,23 @@ int main() {
     safe_xgboost(XGBoosterPredictFromDMatrix(booster, dmat, config, &out_shape, &out_dim, &predictions));
 
     // DO SOMETHING WITH predicitions
+    std::vector<unsigned> indices;
+    for (unsigned i = 0; i < num_rows; ++i) {
+        indices.push_back(i);
+    }
+    indices.shrink_to_fit();
+    auto comp = [predictions](size_t first, size_t second) {
+        return predictions[first] > predictions[second];
+    };
+    std::partial_sort(indices.begin(), indices.begin() + 10,
+                      indices.end(), comp);
+    std::sort(indices.begin(), indices.begin() + 10, comp);
+    indices.resize(10);
+    std::vector<float> top10;
+    for (unsigned i = 0; i < 10; ++i) {
+        top10.push_back(predictions[indices[i]]);
+        std::cout << top10.back() << std::endl;
+    }
 
     safe_xgboost(XGDMatrixFree(dmat));
     safe_xgboost(XGBoosterFree(booster));
