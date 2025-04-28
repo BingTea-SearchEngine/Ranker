@@ -13,6 +13,8 @@ target_include_directories(Ranker PUBLIC ${PROJECT_SOURCE_DIR}/include)
 find_package(xgboost REQUIRED)
 add_executable(Runner src/main.cpp)
 add_executable(HashTrain src/hash_train.cpp)
+add_executable(Predict src/predict.cpp)
 
 target_link_libraries(Runner PUBLIC Ranker xgboost::xgboost CMPH)
 target_link_libraries(HashTrain PUBLIC Ranker xgboost::xgboost CMPH)
+target_link_libraries(Predict PUBLIC Ranker xgboost::xgboost)
