@@ -158,7 +158,7 @@ url=https://www.businessinsider.com/startups numWords=1199 numTitleWords=3 numOu
 url=https://www.businessinsider.com/startups numWords=1199 numTitleWords=3 numOutLinks=6 numTitleMatch=0 numBodyMatch=1 pageRank=9.40928e-09 cheiRank=1.70883e-08 community=100 communityCount=1 rankingScore=8.84823 
 url=https://www.businessinsider.com/author/geoff-weiss numWords=818 numTitleWords=4 numOutLinks=6 numTitleMatch=0 numBodyMatch=1 pageRank=9.40928e-09 cheiRank=1.70883e-08 community=100 communityCount=1 rankingScore=8.88038 
 url=https://blog.powr.io/page/7 numWords=646 numTitleWords=3 numOutLinks=31 numTitleMatch=0 numBodyMatch=1 pageRank=1.57902e-08 cheiRank=9.77254e-08 community=0 communityCount=27793988 rankingScore=9.01483 
-url=https://brand24.com/partner-directory/ numWords=498 numTitleWords=4 numOutLinks=38 numTitleMatch=0 numBodyMatch=1 pageRank=9.
+url=https://brand24.com/partner-directory/ numWords=498 numTitleWords=4 numOutLinks=38 numTitleMatch=0 numBodyMatch=1 pageRank=9.05554 cheiRank=1.70883e-08 community=100 communityCount=1 rankingScore=7.4668 
 Query: 35
 url=https://www.outdoorgearlab.com/ numWords=861 numTitleWords=9 numOutLinks=0 numTitleMatch=1 numBodyMatch=16 pageRank=9.40928e-09 cheiRank=1.70883e-08 community=100 communityCount=1 rankingScore=26.8417 
 url=https://www.yakima.com/ numWords=917 numTitleWords=1 numOutLinks=6 numTitleMatch=0 numBodyMatch=1 pageRank=6.33784e-08 cheiRank=6.15715e-08 community=0 communityCount=27793988 rankingScore=8.26302 
@@ -170,7 +170,7 @@ url=https://blog.d4caltrops.com/ numWords=1720 numTitleWords=2 numOutLinks=2 num
 url=https://xwp.co/about/careers/ numWords=837 numTitleWords=2 numOutLinks=23 numTitleMatch=0 numBodyMatch=1 pageRank=4.95098e-08 cheiRank=6.96685e-08 community=0 communityCount=27793988 rankingScore=8.84513 
 url=https://www.adventurecats.org/pawsome-reads/11-tips-for-photographing-your-adventure-cat/ numWords=660 numTitleWords=7 numOutLinks=0 numTitleMatch=0 numBodyMatch=1 pageRank=9.40928e-09 cheiRank=1.70883e-08 community=100 communityCount=1 rankingScore=8.85404 
 url=https://www.adventurecats.org/pawsome-reads/cats-ultimate-pokemon-hunters/ numWords=404 numTitleWords=10 numOutLinks=0 numTitleMatch=0 numBodyMatch=1 pageRank=9.40928e-09 cheiRank=1.70883e-08 community=100 communityCount=1 rankingScore=8.92756 
-url=https://equinoxmountain.com/ numWords=615 numTitleWords=4 numOutLinks=6 numTitleMatch=0 numBodyMatch=1 pageRank=1.44571e-08 cheiRank=1.18552e-07 community
+url=https://equinoxmountain.com/ numWords=615 numTitleWords=4 numOutLinks=6 numTitleMatch=0 numBodyMatch=1 pageRank=1.44571e-08 cheiRank=1.18552e-07 community=0 communityCount=27793988 rankingScore=8.94311 
 Query: 36
 url=https://www.aarp.org/health/conditions-treatments/exercises-for-lower-back-pain/ numWords=3578 numTitleWords=6 numOutLinks=24 numTitleMatch=3 numBodyMatch=99 pageRank=9.40928e-09 cheiRank=1.71889e-08 community=0 communityCount=27793988 rankingScore=43.6321 
 url=https://www.sports-health.com/sports-injuries/elbow-injuries numWords=216 numTitleWords=2 numOutLinks=3 numTitleMatch=0 numBodyMatch=1 pageRank=9.40928e-09 cheiRank=1.71205e-08 community=0 communityCount=27793988 rankingScore=7.5936 
